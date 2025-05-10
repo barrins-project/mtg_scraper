@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mtgtop8_scraper"
+version = "0.1.0"
+authors = [
+    { name = "Martin Cuchet", email = "martin.cuchet@gmail.com" }
+]
+description = "Scraper for decklists and tournaments data from source mtgtop8.com"
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["mtg", "Magic: the Gathering", "CCG", "MTGTOP8", "Scraper"]
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 2 - Pre-Alpha",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "beautifulsoup4",
+    "requests",
+    "pydantic",
+    "ruff",
+    "black",
+    "isort",
+]
+
+[tool.setuptools.packages.find]
+include = ["scraper*"]
+
+[tool.setuptools_scm]
+
+[tool.zest-releaser]
+create-wheel = true
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+ignore = ["E402", "E712", "F403"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-line-length = "dynamic"
