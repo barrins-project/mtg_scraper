@@ -1,0 +1,3 @@
+[submodule "scraped"]
+	path = scraped
+	url = git@github.com:barrins-project/mtg_scraper.git
