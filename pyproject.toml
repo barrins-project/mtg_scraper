@@ -3,15 +3,15 @@ requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mtgtop8_scraper"
+name = "mtg_scraper"
 version = "0.1.0"
 authors = [
     { name = "Martin Cuchet", email = "martin.cuchet@gmail.com" }
 ]
-description = "Scraper for decklists and tournaments data from source mtgtop8.com"
+description = "Scraper for decklists and tournaments data from differente sources"
 readme = "README.md"
 license = { file = "LICENSE" }
-keywords = ["mtg", "Magic: the Gathering", "CCG", "MTGTOP8", "Scraper"]
+keywords = ["mtg", "Magic: the Gathering", "CCG", "Scraper"]
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -23,10 +23,17 @@ classifiers = [
 dependencies = [
     "beautifulsoup4",
     "requests",
+    "selenium", # MTGO Scrapping needs navigator simulating
+    "webdriver-manager", # MTGO Scrapping needs navigator simulating
     "pydantic",
-    "ruff",
+]
+
+[project.optional-dependencies]
+dev = [
     "black",
     "isort",
+    "ruff",
+    "zest.releaser[recommended]",
 ]
 
 [tool.setuptools.packages.find]
