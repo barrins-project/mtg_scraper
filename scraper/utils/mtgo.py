@@ -30,7 +30,6 @@ def we_should_scrape_it(tournament_url: str, max_days_to_be_recent: int = 2) -> 
                 recent_scrape = age.days < max_days_to_be_recent
 
     if already_scraped and not recent_scrape:
-        print(f"⛔ Tournoi déjà scrappé (ancien) ignoré : {tournament_url}")
         return False
 
     return True
