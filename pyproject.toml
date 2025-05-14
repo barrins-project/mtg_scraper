@@ -36,6 +36,9 @@ dev = [
     "zest.releaser[recommended]",
 ]
 
+[project.scripts]
+scrape = "scraper.__main__:main"
+
 [tool.setuptools.packages.find]
 include = ["scraper*"]
 
