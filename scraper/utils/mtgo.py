@@ -12,7 +12,7 @@ from scraper.parsers import mtgo as parser
 from scraper.schemas import MTGScrape
 
 BASE_URL = "https://www.mtgo.com/decklists/"
-BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgo"
+BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgo.com"
 
 
 def we_should_scrape_it(tournament_url: str, max_days_to_be_recent: int = 1) -> bool:
@@ -65,12 +65,14 @@ def scrape_tournament(
 
 def save_tournament_scrape(scrape: MTGScrape) -> None:
     tournament_url = scrape.tournament.url
-    tournament_date = scrape.tournament.date
-
-    # Parsing date to use it in dir path
-    year = str(tournament_date.year)
-    month = f"{tournament_date.month:02}"
-    day = f"{(tournament_date.day):02}"
+    match = re.search(r"(\d{4})-(\d{2})-(\d{2})", tournament_url)
+    if match:
+        year, month, day = map(str, match.groups())
+    else:
+        tournament_date = scrape.tournament.date
+        year = str(tournament_date.year)
+        month = f"{tournament_date.month:02}"
+        day = f"{(tournament_date.day):02}"
 
     # Making sure that YYYY/MM/DD folder exists
     dir_path = BASE_PATH / year / month / day
