@@ -51,13 +51,13 @@ def scrape_tournament(
     time.sleep(sleep_time)
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    tournament = parser.tournament(soup, url).model_dump(mode="json")
+    tournament = parser.tournament(soup, url)
     if not tournament:
         print("❌ Element manquant dans les données du tournoi, extraction annulée.")
         return None
 
     return MTGScrape(
-        tournament=tournament,
+        tournament=tournament.model_dump(mode="json"),
         decks=[deck.model_dump(mode="json") for deck in parser.decks(soup, url)],
         rounds=[round.model_dump(mode="json") for round in parser.rounds(soup)],
         standings=[stding.model_dump(mode="json") for stding in parser.standings(soup)],
