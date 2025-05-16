@@ -56,10 +56,10 @@ def scrape_tournament(
         return None
 
     return MTGScrape(
-        tournament=tournament.model_dump(mode="json"),
-        decks=[deck.model_dump(mode="json") for deck in parser.decks(soup, url)],
-        rounds=[round.model_dump(mode="json") for round in parser.rounds(soup)],
-        standings=[stding.model_dump(mode="json") for stding in parser.standings(soup)],
+        tournament=tournament,
+        decks=[deck for deck in parser.decks(soup, url)],
+        rounds=[round for round in parser.rounds(soup)],
+        standings=[stding for stding in parser.standings(soup)],
     )
 
 
