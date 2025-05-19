@@ -70,7 +70,7 @@ def get_date(tournament_soup: BeautifulSoup) -> date:
         if parent:
             for tag in parent.find_all("div"):
                 line = tag.get_text(strip=True)
-                date_match = re.match(r"(\d{2}/\d{2}/\d{2})", line)
+                date_match = re.search(r"(\d{2}\/\d{2}\/\d{2})", line)
                 if date_match:
                     day, month, year = date_match.group(1).split("/")
                     return datetime(int(year) + 2000, int(month), int(day)).date()
@@ -108,7 +108,7 @@ def get_players_qty(tournament_soup: BeautifulSoup) -> int:
             for tag in parent.find_all("div"):
                 line = tag.get_text(strip=True)
                 if "players" in line.lower():
-                    players_match = re.match(r"(\d+) players", line)
+                    players_match = re.search(r"(\d+) players", line)
                     if players_match:
                         return int(players_match.group(1))
 
@@ -120,7 +120,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
     player_name = "Unknown Player"
     result = 0
 
-    id_match = re.match(r"d=(\d+)", str(deck_tag["href"]))
+    id_match = re.search(r"d=(\d+)", str(deck_tag["href"]))
     if id_match:
         deck_id = int(id_match.group(1))
     else:
@@ -144,7 +144,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
         for div_tag in parent_block.find_all("div"):
             div_text = div_tag.get_text(strip=True)
             if div_text:
-                result_match = re.match(r"(\d(?:-\d)?)", div_text)
+                result_match = re.search(r"(\d(?:-\d)?)", div_text)
                 if result_match:
                     result_text = result_match.group(1)
                     if "-" in result_text:
