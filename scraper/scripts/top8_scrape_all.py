@@ -17,10 +17,9 @@ def main():
 
     nb_files = -1
     while nb_files < count_files():
+        nb_files = count_files()
         services.mtgtop8()
         time.sleep(1)
-
-        nb_files = count_files()
 
     print(f"Scraped {count_files() - nb_files_before} tournaments.")
 
