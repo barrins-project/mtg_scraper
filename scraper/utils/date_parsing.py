@@ -1,11 +1,11 @@
 from datetime import date, datetime
-from typing import List, Optional
+from typing import List
 
 
 def parse_date(
     date_text: object,
     formats: List[str] = ["%m/%d/%Y", "%B %d, %Y"],
-) -> Optional[date]:
+) -> date:
     try:
         if isinstance(date_text, date):
             return date_text
@@ -19,10 +19,10 @@ def parse_date(
                     continue
     except Exception as e:
         print(f"❌ Error parsing date from string: {e} // input={repr(date_text)}")
-    return None
+    return datetime(1993, 8, 5).date()
 
 
-def get_month_range(date_from: datetime, date_to: datetime):
+def get_month_range(date_from: date, date_to: date):
     date_tuples = []
     for year in range(date_from.year, date_to.year + 1):
         start_month = date_from.month if year == date_from.year else 1

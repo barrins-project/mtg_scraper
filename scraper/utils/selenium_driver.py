@@ -1,6 +1,7 @@
+import os
 import time
 from typing import List
-import os
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -43,7 +44,7 @@ def get_tournaments(
     for link in soup.select(
         "#decklists > div.site-content > div.container-page-fluid.decklists-page > ul > li > a"
     ):
-        href = link.get("href")
+        href = str(link.get("href"))
         full_url = f"https://www.mtgo.com{href}" if href.startswith("/") else href
         tournaments.append(full_url)
     return tournaments

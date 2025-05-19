@@ -57,9 +57,9 @@ def scrape_tournament(
 
     return MTGScrape(
         tournament=tournament,
-        decks=[deck for deck in parser.decks(soup, url)],
-        rounds=[round for round in parser.rounds(soup)],
-        standings=[stding for stding in parser.standings(soup)],
+        decks=parser.decks(soup, url),
+        rounds=parser.rounds(soup),
+        standings=parser.standings(soup),
     )
 
 

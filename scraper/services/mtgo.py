@@ -1,8 +1,9 @@
 import time
+from collections import defaultdict
 from datetime import date
 from queue import Queue
 from threading import Lock, Thread
-from collections import defaultdict
+from typing import DefaultDict
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 
@@ -18,7 +19,7 @@ def scrape_mtgo(
     task_queue = Queue()
     lock = Lock()
     drivers = [driver_utils.init_driver() for _ in range(num_threads)]
-    retries = defaultdict(int)
+    retries: DefaultDict[str, int] = defaultdict(int)
 
     producer_thread = Thread(
         target=producer,

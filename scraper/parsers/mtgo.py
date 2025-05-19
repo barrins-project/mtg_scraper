@@ -47,7 +47,7 @@ def standings(soup: BeautifulSoup) -> List[Standing]:
     return [
         get_standing(row, nb_rounds)
         for row in standings_table.find_all("tr")
-        if row.find_all("td")  # éviter les lignes vides
+        if isinstance(row, Tag) and row.find_all("td")  # éviter les lignes vides
     ]
 
 
@@ -97,10 +97,10 @@ def get_player_qty(soup: BeautifulSoup) -> int:
 
 def get_deck(deck_section: Tag, url: str) -> Deck:
     event_tag = deck_section.find("p", class_="decklist-event")
-    event_name = event_tag.get_text(strip=True)
+    event_name = event_tag.get_text(strip=True) if event_tag else ""
 
     player_tag = deck_section.find("p", class_="decklist-player")
-    player_info = player_tag.get_text(strip=True)
+    player_info = player_tag.get_text(strip=True) if player_tag else ""
     player_name, position_text = player_info.rsplit(" (", 1)
     if "League" in event_name or "Last Chance" in event_name:
         position_number = None
@@ -108,7 +108,7 @@ def get_deck(deck_section: Tag, url: str) -> Deck:
         position_number = int(position_text.split("Place")[0].strip()[:-2])
 
     date_tag = deck_section.find("p", class_="decklist-date")
-    event_date = parse_date(date_tag.get_text(strip=True))
+    event_date = parse_date(date_tag.get_text(strip=True) if date_tag else "08/05/1993")
 
     mainboard, sideboard = [], []
     mainboard_tag = deck_section.select(".decklist-sort-type .decklist-category")
@@ -130,7 +130,7 @@ def get_deck(deck_section: Tag, url: str) -> Deck:
                 sideboard.append(CardEntry(name=name, count=qty))
 
     return Deck(
-        date=str(event_date),
+        date=event_date,
         player=player_name,
         result=position_number,
         anchor_uri=f"{url}#{deck_section['id']}",
@@ -140,10 +140,11 @@ def get_deck(deck_section: Tag, url: str) -> Deck:
 
 
 def get_round(round_block: Tag) -> Round:
+    round_name = round_block.select_one(".decklist-bracket-round-title")
+    round_name = round_name.get_text(strip=True) if round_name else "Unknown Round"
+
     return Round(
-        round_name=round_block.select_one(".decklist-bracket-round-title").get_text(
-            strip=True
-        ),
+        round_name=round_name,
         matches=[
             get_match(match_wrapper)
             for match_wrapper in round_block.select(".decklist-bracket-match-wrapper")
@@ -162,7 +163,8 @@ def get_match(match_wrapper: Tag) -> Match:
             winner_name = winner_name.strip()
             score = score.strip()
         else:
-            winner_name, score = winner_text, None
+            winner_name = winner_text
+            score = ""
 
         return Match(player_1=winner_name, player_2=loser_text, result=score)
 
