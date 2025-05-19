@@ -5,6 +5,7 @@ from threading import Lock, Thread
 from typing import DefaultDict
 
 from scraper.utils import mtgtop8_utils
+from scraper.parsers import mtgtop8 as parser
 
 
 def scrape_mtgtop8(
@@ -59,9 +60,11 @@ def producer(
         return
 
     if mtgtop8_utils.we_should_scrape_it(tournament_url):
-        with lock:
-            queue.put((tournament_url, tournament_soup))
-        print(f"✅ Tournament {id_to_scrape} queued for scraping.")
+        if parser.get_format(tournament_soup) != "Unknown Format":
+            with lock:
+                queue.put((tournament_url, tournament_soup))
+            print(f"✅ Tournament {id_to_scrape} queued for scraping.")
+        print(f"❌ Tournament {id_to_scrape} has an unsupported format.")
     else:
         print(f"❌ Tournament {id_to_scrape} already scraped.")
 
