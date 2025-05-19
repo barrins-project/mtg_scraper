@@ -60,14 +60,13 @@ def producer(
         return
 
     if mtgtop8_utils.we_should_scrape_it(tournament_url):
-        if parser.get_format(tournament_soup) != "Unknown Format":
-            with lock:
-                queue.put((tournament_url, tournament_soup))
-            print(f"✅ Tournament {id_to_scrape} queued for scraping.")
-        else:
+        if parser.get_format(tournament_soup) == "Unknown Format":
             print(f"❌ Tournament {id_to_scrape} has an unsupported format.")
-    else:
-        print(f"❌ Tournament {id_to_scrape} already scraped.")
+            return
+
+        with lock:
+            queue.put((tournament_url, tournament_soup))
+        print(f"✅ Tournament {id_to_scrape} queued for scraping.")
 
 
 def consumer(
