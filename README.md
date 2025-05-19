@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
+[Français](https://github.com/barrins-project/mtg_scraper/blob/main/README.md) | [Anglais](https://github.com/barrins-project/mtg_scraper/blob/main/README_EN.md)
 
 Un scraper modulaire et multithreadé pour récupérer les résultats de tournois Magic: The Gathering depuis plusieurs sources, notamment **MTGO** et **MTGTop8**.
 Conçu pour être intégré dans des pipelines de collecte de données, ce projet alimente une base d’analyse statistique et de visualisation dédiée aux formats compétitifs comme **Duel Commander**, **EDH**, ou **Modern**.
@@ -50,10 +51,11 @@ scrape --source mtgtop8 --date-from 2024-05 --date-to 2024-12
 ### 3. Exemple de code
 
 ```python
+from datetime import datetime
 from scraper import services
 
 # Télécharger les tournois d’avril 2024
-services.scrape_mtgtop8("2024-04")
+services.scrape_mtgtop8(datetime(2024, 4, 1).date())
 ```
 
 Il n'est actuellement pas prévu d'extraire uniquement un seul format depuis n'importe quelle
