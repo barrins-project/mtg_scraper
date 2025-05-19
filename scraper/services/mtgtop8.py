@@ -64,7 +64,8 @@ def producer(
             with lock:
                 queue.put((tournament_url, tournament_soup))
             print(f"✅ Tournament {id_to_scrape} queued for scraping.")
-        print(f"❌ Tournament {id_to_scrape} has an unsupported format.")
+        else:
+            print(f"❌ Tournament {id_to_scrape} has an unsupported format.")
     else:
         print(f"❌ Tournament {id_to_scrape} already scraped.")
 
