@@ -96,16 +96,14 @@ def get_player_qty(soup: BeautifulSoup) -> int:
 
 
 def get_deck(deck_section: Tag, url: str) -> Deck:
-    event_tag = deck_section.find("p", class_="decklist-event")
-    event_name = event_tag.get_text(strip=True) if event_tag else ""
-
     player_tag = deck_section.find("p", class_="decklist-player")
     player_info = player_tag.get_text(strip=True) if player_tag else ""
     player_name, position_text = player_info.rsplit(" (", 1)
-    if "League" in event_name or "Last Chance" in event_name:
-        position_number = None
-    else:
+
+    try:
         position_number = int(position_text.split("Place")[0].strip()[:-2])
+    except ValueError:
+        position_number = None
 
     date_tag = deck_section.find("p", class_="decklist-date")
     event_date = parse_date(date_tag.get_text(strip=True) if date_tag else "08/05/1993")
