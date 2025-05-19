@@ -4,20 +4,9 @@ from typing import List, Optional
 
 from bs4 import BeautifulSoup, Tag
 
-from scraper.schemas import CardEntry, Deck, Match, Round, Standing, Tournament
+from scraper.schemas import FORMATS, CardEntry, Deck, Match, Round, Standing, Tournament
 from scraper.utils.date_parsing import parse_date
 from scraper.utils.swiss_tournament import get_num_rounds
-
-FORMATS = [
-    "Standard",
-    "Modern",
-    "Pioneer",
-    "Vintage",
-    "Legacy",
-    "Pauper",
-    "Limited",
-    "Duel Commander",
-]
 
 
 def tournament(soup: BeautifulSoup, tournament_url: str) -> Optional[Tournament]:

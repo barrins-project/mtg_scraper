@@ -46,7 +46,7 @@ def main():
     if args.source == "mtgo":
         services.mtgo(date_from, date_to)
     elif args.source == "mtgtop8":
-        print("lol")
+        services.mtgtop8()
 
 
 if __name__ == "__main__":

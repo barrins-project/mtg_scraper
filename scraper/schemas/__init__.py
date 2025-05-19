@@ -16,4 +16,7 @@ TYPE_NAMESPACE = {
 
 MTGScrape.model_rebuild(_types_namespace=TYPE_NAMESPACE)
 
+
+from scraper.schemas.formats import FORMATS as FORMATS
+
 __all__ = ["CardEntry", "Deck", "Match", "Round", "MTGScrape", "Standing", "Tournament"]
