@@ -52,7 +52,7 @@ def producer(
     try:
         print("⚙️ Retrieving MTGO tournament links...")
         for year, month in get_month_range(date_from, date_to):
-            tournaments_links = driver_utils.get_tournaments(driver, year, month)
+            tournaments_links = driver_utils.get_mtgo_tournaments(driver, year, month)
             to_scrape = 0
             for link in tournaments_links:
                 if mtgo_utils.we_should_scrape_it(link):

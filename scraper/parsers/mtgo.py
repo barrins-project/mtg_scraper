@@ -30,7 +30,7 @@ def decks(soup: BeautifulSoup, tournament_url: str) -> List[Deck]:
         for deck in soup.select("section.decklist"):
             decks.append(get_deck(deck, tournament_url))
     except Exception as e:
-        print("❌  error with deck:", deck["id"], "// error:", e)
+        print("❌ Error with deck:", e)
     return decks
 
 

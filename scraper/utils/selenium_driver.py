@@ -30,7 +30,7 @@ def init_driver() -> webdriver.Chrome:
     return webdriver.Chrome(service=service, options=options)
 
 
-def get_tournaments(
+def get_mtgo_tournaments(
     driver: WebDriver,
     year: int,
     month: int,
