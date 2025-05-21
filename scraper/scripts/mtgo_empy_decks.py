@@ -1,12 +1,12 @@
-from scraper.utils import mtgo_utils
-from scraper.services.mtgo import consumer
 import json
-from queue import Queue
-from threading import Lock, Thread
-from scraper.utils import driver_utils
-from typing import DefaultDict, List
 from collections import defaultdict
 from pathlib import Path
+from queue import Queue
+from threading import Lock, Thread
+from typing import DefaultDict, List
+
+from scraper.services.mtgo import consumer
+from scraper.utils import driver_utils, mtgo_utils
 
 
 def get_tournaments_without_decks(queue: Queue, lock: Lock) -> None:
