@@ -73,6 +73,9 @@ def get_date(tournament_soup: BeautifulSoup) -> date:
                 date_match = re.search(r"(\d{2}\/\d{2}\/\d{2})", line)
                 if date_match:
                     day, month, year = date_match.group(1).split("/")
+                    if int(year) + 2000 > datetime.now().year:
+                        # Handle the case where the year is in the 1900s
+                        year = str(int(year) - 100)
                     return datetime(int(year) + 2000, int(month), int(day)).date()
 
     # Default date if not found
