@@ -26,17 +26,19 @@ def scrape_gaps(num_threads: int = 4):
 
     missing_ids = get_gaps()
 
-    producer_threads = [
-        Thread(
-            target=producer,
-            args=(id, task_queue, lock),
-        )
-        for id in missing_ids
-    ]
-    for thread in producer_threads:
-        thread.start()
-    for thread in producer_threads:
-        thread.join()
+    for i in range(len(missing_ids) // 10):
+        threads = [
+            Thread(
+                target=producer,
+                args=(missing_ids[10 * i + j], task_queue, lock),
+            )
+            for j in range(10)
+        ]
+
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
     print(f"📦 Total tournaments queued: {task_queue.qsize()}")
 

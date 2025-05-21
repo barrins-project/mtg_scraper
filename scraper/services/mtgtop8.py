@@ -52,21 +52,25 @@ def producer(
     queue: Queue,
     lock: Lock,
 ):
-    tournament_url = mtgtop8_utils.get_tournament_url(id_to_scrape)
-    tournament_soup = mtgtop8_utils.get_tournament_soup(tournament_url)
+    try:
+        tournament_url = mtgtop8_utils.get_tournament_url(id_to_scrape)
+        tournament_soup = mtgtop8_utils.get_tournament_soup(tournament_url)
 
-    if "No event could be found." in tournament_soup.text:
-        print(f"❌ Tournament {id_to_scrape} not scrapable.")
-        return
-
-    if mtgtop8_utils.we_should_scrape_it(tournament_url):
-        if parser.get_format(tournament_soup) == "Unknown Format":
-            print(f"❌ Tournament {id_to_scrape} has an unsupported format.")
+        if "No event could be found." in tournament_soup.text:
+            print(f"❌ Tournament {id_to_scrape} not scrapable.")
             return
 
-        with lock:
-            queue.put((tournament_url, tournament_soup))
-        print(f"✅ Tournament {id_to_scrape} queued for scraping.")
+        if mtgtop8_utils.we_should_scrape_it(tournament_url):
+            if parser.get_format(tournament_soup) == "Unknown Format":
+                print(f"❌ Tournament {id_to_scrape} has an unsupported format.")
+                return
+
+            with lock:
+                queue.put((tournament_url, tournament_soup))
+            print(f"✅ Tournament {id_to_scrape} queued for scraping.")
+
+    finally:
+        time.sleep(0.5)
 
 
 def consumer(
