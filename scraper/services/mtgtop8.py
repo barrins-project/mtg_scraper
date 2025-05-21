@@ -4,8 +4,8 @@ from queue import Queue
 from threading import Lock, Thread
 from typing import DefaultDict
 
-from scraper.utils import mtgtop8_utils
 from scraper.parsers import mtgtop8 as parser
+from scraper.utils import mtgtop8_utils
 
 
 def scrape_mtgtop8(

@@ -10,7 +10,7 @@ from scraper.parsers.mtgtop8 import get_tournament_soup as get_tournament_soup
 from scraper.schemas import MTGScrape
 
 # Tournament file naming convention:
-# <tournament_id>_<sanitized_tournament_name>.json
+# <tournament_id>_<sanitized_format>_<sanitized_tournament_name>.json
 
 BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgtop8.com"
 
@@ -58,11 +58,18 @@ def scrape_tournament(
 
 
 def save_tournament_scrape(scrape: MTGScrape) -> None:
+    # Generating the file name
     tournament_name = scrape.tournament.name
+    tournament_format = scrape.tournament.format
     tournament_id = scrape.tournament.url.split("e=")[1]
     if "&" in tournament_id:
         tournament_id = tournament_id.split("&")[0]
 
+    filename = sanitize_string(f"{tournament_id}")
+    filename = sanitize_string(f"{filename}_{tournament_format}")
+    filename = sanitize_string(f"{filename}_{tournament_name}.json")
+
+    # Getting the file path
     tournament_date = scrape.tournament.date
     year = str(tournament_date.year)
     month = f"{tournament_date.month:02}"
@@ -72,8 +79,6 @@ def save_tournament_scrape(scrape: MTGScrape) -> None:
     dir_path = BASE_PATH / year / month / day
     dir_path.mkdir(parents=True, exist_ok=True)
 
-    # Cleaning filename
-    filename = sanitize_filename(f"{tournament_id}_{tournament_name}.json")
     file_path = Path(dir_path / filename)
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -82,9 +87,9 @@ def save_tournament_scrape(scrape: MTGScrape) -> None:
     print(f"📂 Data saved in {file_path}")
 
 
-def sanitize_filename(name: str) -> str:
-    name = name.lower()
-    name = re.sub(r"[^a-z0-9_.]+", "-", name)
-    name = re.sub(r"-+", "-", name)
-    name = name.strip("-")
-    return name
+def sanitize_string(string: str) -> str:
+    string = string.lower()
+    string = re.sub(r"[^a-z0-9_.]+", "-", string)
+    string = re.sub(r"-+", "-", string)
+    string = string.strip("-")
+    return string
