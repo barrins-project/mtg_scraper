@@ -16,7 +16,7 @@ def scrape_mtgtop8(
     lock = Lock()
     retries: DefaultDict[str, int] = defaultdict(int)
 
-    first_id = mtgtop8_utils.get_id_scraped() + 1
+    first_id = mtgtop8_utils.get_max_id_scraped() + 1
     for i in range(span // 10):
         threads = [
             Thread(

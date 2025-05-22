@@ -15,15 +15,19 @@ from scraper.schemas import MTGScrape
 BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgtop8.com"
 
 
-def get_id_scraped() -> int:
+def get_max_id_scraped() -> int:
     max_id = 0
     for file in BASE_PATH.rglob("*.json"):
         try:
-            file_id = int(file.stem.split("_")[0])
+            file_id = get_id_from_filepath(file)
             max_id = max(max_id, file_id)
         except ValueError:
             continue
     return max_id
+
+
+def get_id_from_filepath(filepath: Path) -> int:
+    return int(filepath.stem.split("_")[0])
 
 
 def get_tournament_url(tournament_id: int) -> str:
