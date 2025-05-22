@@ -41,17 +41,20 @@ def we_should_scrape_it(tournament_url: str) -> bool:
     ]
 
 
-def scrape_tournament(
-    url: str, soup: BeautifulSoup, sleep_time: int = 5
-) -> Optional[MTGScrape]:
+def scrape_tournament(url: str, soup: BeautifulSoup) -> Optional[MTGScrape]:
     tournament = parser.tournament(url, soup)
     if not tournament:
         print("❌ Element manquant dans les données du tournoi, extraction annulée.")
         return None
 
+    tournament_date = tournament.date
+    decks = parser.decks(soup)
+    for deck in decks:
+        deck.date = tournament_date
+
     return MTGScrape(
         tournament=tournament,
-        decks=parser.decks(soup),
+        decks=decks,
         rounds=[],  # MTGTOP8 does not provide round and standings data
         standings=[],  # MTGTOP8 does not provide round and standings data
     )
