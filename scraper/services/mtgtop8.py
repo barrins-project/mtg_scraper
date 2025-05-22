@@ -91,7 +91,6 @@ def consumer(
             tournament_scrape = mtgtop8_utils.scrape_tournament(
                 url=url_task,
                 soup=soup_task,
-                sleep_time=5 * (retries[url_task] + 1),
             )
             if tournament_scrape:
                 mtgtop8_utils.save_tournament_scrape(tournament_scrape)
