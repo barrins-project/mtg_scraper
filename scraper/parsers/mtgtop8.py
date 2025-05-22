@@ -1,7 +1,7 @@
 import re
 import time
 from datetime import date, datetime
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Tuple, cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -118,41 +118,29 @@ def get_players_qty(tournament_soup: BeautifulSoup) -> int:
 
 
 def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
-    deck_id = 0
+    href = str(deck_tag.get("href", ""))
+    id_match = re.search(r"d=(\d+)", href)
+    if not id_match:
+        raise ValueError(f"Deck ID not found in href: {href}")
+    deck_id = int(id_match.group(1))
+
     player_name = "Unknown Player"
     result = 0
+    parent_div = deck_tag.find_parent("div")
+    container = cast(Tag, parent_div.find_parent("div")) if parent_div else None
+    if not container:
+        raise ValueError("Container block with player info not found.")
 
-    id_match = re.search(r"d=(\d+)", str(deck_tag["href"]))
-    if id_match:
-        deck_id = int(id_match.group(1))
-    else:
-        deck_id = int(re.split("=", str(deck_tag["href"]))[2][:-2])
+    player_tag = container.find("a", class_="player")
+    if player_tag:
+        player_name = player_tag.get_text(strip=True)
 
-    parent_block = deck_tag.parent
-    if not parent_block:
-        raise ValueError("Parent block not found")
-    else:
-        parent_block = parent_block.parent
-    if not parent_block:
-        raise ValueError("Parent block not found")
-    else:
-        parent_block = parent_block.parent
-
-    if parent_block:
-        player_tag = parent_block.find("a", attrs={"class": "player"})
-        if player_tag:
-            player_name = player_tag.get_text(strip=True)
-
-        for div_tag in parent_block.find_all("div"):
-            div_text = div_tag.get_text(strip=True)
-            if div_text:
-                result_match = re.search(r"(\d(?:-\d)?)", div_text)
-                if result_match:
-                    result_text = result_match.group(1)
-                    if "-" in result_text:
-                        result = int(result_text.split("-")[0])
-                    else:
-                        result = int(result_text)
+    # Cherche un score comme "1", "3-4", etc.
+    for div in container.find_all("div"):
+        text = div.get_text(strip=True)
+        if re.fullmatch(r"\d+(-\d+)?", text):
+            result = int(text.split("-")[0])
+            break
 
     mainboard, sideboard = get_decklist(deck_id)
     if not mainboard:
@@ -164,7 +152,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
             date=datetime.now().date(),
             player=player_name,
             result=result,
-            anchor_uri=f"https://mtgtop8.com/event{str(deck_tag["href"])}",
+            anchor_uri=f"https://mtgtop8.com/event{href}",
             mainboard=mainboard,
             sideboard=sideboard,
         ),
