@@ -44,23 +44,22 @@ def tournament(tournament_url: str, tournament_soup: BeautifulSoup) -> Tournamen
 
 
 def decks(tournament_soup: BeautifulSoup) -> List[Deck]:
-    decks: Mapping[int, Deck] = {}
+    decks_dict: Mapping[int, Deck] = {}
 
-    top8_decks = [
-        get_deck_from_top8(deck_tag)
-        for deck_tag in tournament_soup.select("div.S14 a[href^='?e=']")
-    ]
-    for deck_id, deck_obj in top8_decks:
-        decks[deck_id] = deck_obj
+    top8_tags = tournament_soup.select(
+        ".chosen_tr div.S14 a[href^='?e='], .hover_tr div.S14 a[href^='?e=']"
+    )
+    out_tags = tournament_soup.select("div.S14 input[type='radio']")
 
-    out_decks = [
-        get_deck_out_top8(deck_tag)
-        for deck_tag in tournament_soup.select("div.S14 input[type='radio']")
-    ]
-    for deck_id, deck_obj in out_decks:
-        decks[deck_id] = deck_obj
+    for deck_tag in top8_tags:
+        deck_id, deck_obj = get_deck_from_top8(deck_tag)
+        decks_dict[deck_id] = deck_obj
 
-    return list(decks.values())
+    for deck_tag in out_tags:
+        deck_id, deck_obj = get_deck_out_top8(deck_tag)
+        decks_dict[deck_id] = deck_obj
+
+    return list(decks_dict.values())
 
 
 def get_date(tournament_soup: BeautifulSoup) -> date:
