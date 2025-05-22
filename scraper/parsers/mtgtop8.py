@@ -222,16 +222,15 @@ def get_cardentries(decklist: str) -> List[CardEntry]:
     cardentries = []
 
     for line in decklist.split("\n"):
-        cardentries.append(handle_line(line))
+        line = line.strip()
+        if len(line.split(" ", maxsplit=1)) == 2:
+            cardentries.append(handle_line(line))
 
     return cardentries
 
 
 def handle_line(line: str) -> CardEntry:
-    parts = line.strip().split(" ", maxsplit=1)
-    if len(parts) < 2:
-        return CardEntry(name="Unknown Card", count=0)
-
+    parts = line.split(" ", maxsplit=1)
     qty = int(parts[0])
     name = sanitize_cardname(parts[1].strip())
 
