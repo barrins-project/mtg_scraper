@@ -72,9 +72,8 @@ def save_tournament_scrape(scrape: MTGScrape) -> None:
     if "&" in tournament_id:
         tournament_id = tournament_id.split("&")[0]
 
-    filename = sanitize_string(f"{tournament_id}")
-    filename = sanitize_string(f"{filename}_{tournament_format}")
-    filename = sanitize_string(f"{filename}_{tournament_name}.json")
+    filename = f"{tournament_id}_{tournament_format}_{tournament_name}"
+    filename = f"{sanitize_string(filename)}.json"
 
     # Getting the file path
     tournament_date = scrape.tournament.date
