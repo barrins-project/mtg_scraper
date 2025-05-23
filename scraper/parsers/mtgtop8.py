@@ -126,20 +126,29 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
 
     player_name = "Unknown Player"
     result = 0
-    parent_div = deck_tag.find_parent("div")
-    container = cast(Tag, parent_div.find_parent("div")) if parent_div else None
-    if not container:
-        raise ValueError("Container block with player info not found.")
+    current = deck_tag
+    for _ in range(4):
+        parent_div = current.find_parent("div")
+        if not parent_div:
+            raise ValueError("Container block with player info not found.")
+
+        container = cast(Tag, parent_div)
+        if container.has_attr("class"):
+            if "hover_tr" in container["class"] or "chosen_tr" in container["class"]:
+                break
+        current = container
 
     player_tag = container.find("a", class_="player")
     if player_tag:
         player_name = player_tag.get_text(strip=True)
 
     # Cherche un score comme "1", "3-4", etc.
-    for div in container.find_all("div"):
+    for div in container.find_all("div", class_="S14"):
         text = div.get_text(strip=True)
-        if re.fullmatch(r"\d+(-\d+)?", text):
-            result = int(text.split("-")[0])
+        result_match = re.search(r"^(\d+(-\d+)?)$", text)
+        if result_match:
+            result_text = result_match.group(1)
+            result = int(result_text.split("-")[0])
             break
 
     mainboard, sideboard = get_decklist(deck_id)
