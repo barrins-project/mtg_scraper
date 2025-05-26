@@ -16,7 +16,7 @@ def main():
 
     parser.add_argument(
         "--source",
-        choices=["mtgo", "mtgtop8"],
+        choices=["mtgo", "mtgtop8", "mtgprime"],
         type=str,
         help="Source being scrapped (default: MTGO)",
         default="mtgo",
@@ -45,8 +45,10 @@ def main():
 
     if args.source == "mtgo":
         services.mtgo(date_from, date_to)
-    elif args.source == "mtgtop8":
+    if args.source == "mtgtop8":
         services.mtgtop8()
+    if args.source == "mtgprime":
+        services.mtgprime()
 
 
 if __name__ == "__main__":
