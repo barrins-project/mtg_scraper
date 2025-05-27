@@ -23,8 +23,8 @@ def rescrape_files(
         return
 
     for chunk_start in range(0, len(scraped_ids), chunk_size):
-        print(f"\n🔁 Processing chunk {chunk_start} to {chunk_start + 1000}")
-        chunk_ids = scraped_ids[chunk_start : chunk_start + 1000]
+        print(f"\n🔁 Processing chunk {chunk_start} to {chunk_start + chunk_size}")
+        chunk_ids = scraped_ids[chunk_start : chunk_start + chunk_size]
 
         task_queue = Queue()
         lock = Lock()
