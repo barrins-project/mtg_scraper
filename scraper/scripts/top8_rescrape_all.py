@@ -11,6 +11,7 @@ from scraper.utils.mtgtop8 import BASE_PATH, get_id_from_filepath
 
 def rescrape_files(
     chunk_size: int = 1000,
+    batch_size: int = 10,
     num_threads: int = 4,
 ):
     scraped_ids: List[int] = [
@@ -30,8 +31,8 @@ def rescrape_files(
         lock = Lock()
         retries: DefaultDict[str, int] = defaultdict(int)
 
-        for i in range(0, len(chunk_ids), 10):
-            batch = chunk_ids[i : i + 10]
+        for i in range(0, len(chunk_ids), batch_size):
+            batch = chunk_ids[i : i + batch_size]
             threads = [
                 Thread(target=producer, args=(event_id, task_queue, lock))
                 for event_id in batch
