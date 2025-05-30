@@ -16,6 +16,7 @@ BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgo.co
 
 
 def we_should_scrape_it(tournament_url: str, max_days_to_be_recent: int = 3) -> bool:
+    # "https://www.mtgo.com/decklist/" is 30 characters long
     filename = sanitize_filename(tournament_url[30:]) + ".json"
 
     already_scraped = False
