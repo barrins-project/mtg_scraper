@@ -45,11 +45,9 @@ def get_mtgo_tournaments(
         for link in soup.select(
             "#decklists > div.site-content > div.container-page-fluid.decklists-page > ul > li > a"
         ):
-            tournaments.append(
-                f"https://www.mtgo.com{str(link.get("href"))}"
-                if str(link.get("href")).startswith("/")
-                else str(link.get("href"))
-            )
+            href = str(link.get("href"))
+            link = f"https://www.mtgo.com{href}" if href.startswith("/") else href
+            tournaments.append(link)
 
         sleep_time *= 2
 
