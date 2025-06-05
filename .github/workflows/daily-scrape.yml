@@ -20,6 +20,10 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update submodule to latest commit from remote
+        run: |
+          git submodule update --remote --merge
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
