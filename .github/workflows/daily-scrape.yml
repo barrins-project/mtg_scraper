@@ -60,8 +60,9 @@ jobs:
             const title = "❌ Échec du scraping quotidien";
             const body = `
               ### Le scraping a échoué
-              - 📅 Date : `${new Date().toISOString()}`
-              - 🔗 [Voir le workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+              - 📅 Date : ${new Date().toISOString()}
+              - 🔗 [Voir le workflow](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
 
               Merci de consulter les logs pour corriger l'erreur.`;
 
