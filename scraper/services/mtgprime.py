@@ -1,11 +1,13 @@
-import pandas as pd
-import requests
 import json
 from io import StringIO
 from pathlib import Path
+from typing import List
+
+import pandas as pd
+import requests
+
 from scraper.parsers.mtgtop8 import HEADERS
 from scraper.schemas import CircuitPlayer
-from typing import List
 
 BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgprime.fr"
 FILENAME = "2025_duel-commander_french-nationals_qualified_players.json"
