@@ -1,0 +1,119 @@
+name: Daily Scrape
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # Tous les jours à 23h UTC
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Run scrapers
+        run: |
+          scrape --source mtgo
+          scrape --source mtgtop8
+
+      - name: Commit scraped data (submodule)
+        working-directory: scraped
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "🔄 Update scraped data"
+          git push || echo "No submodule changes to push"
+
+      - name: Commit submodule pointer in main repo
+        run: |
+          git add scraped
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "🔁 Update submodule reference"
+            git push || echo "Failed to push submodule pointer"
+          else
+            echo "No changes to commit in main repo"
+          fi
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "❌ Échec du scraping quotidien";
+            const body = `
+              ### Le scraping a échoué
+              - 📅 Date : `${new Date().toISOString()}`
+              - 🔗 [Voir le workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+              Merci de consulter les logs pour corriger l'erreur.`;
+
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'automated-scrape-failure'
+            });
+
+            const alreadyExists = issues.data.some(issue => issue.title === title);
+
+            if (!alreadyExists) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['automated-scrape-failure']
+              });
+            } else {
+              console.log("Issue already exists, skipping creation.");
+            }
+
+      - name: Close previous failure issue (if exists)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'automated-scrape-failure'
+            });
+
+            for (const issue of issues.data) {
+              if (issue.title === "❌ Échec du scraping quotidien") {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `✅ Le scraping a réussi le ${new Date().toISOString().slice(0, 10)}. Fermeture automatique.`
+                });
+
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: "closed"
+                });
+
+                console.log(`Closed issue #${issue.number}`);
+              }
+            }
