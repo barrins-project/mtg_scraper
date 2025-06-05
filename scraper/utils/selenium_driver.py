@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-from scraper.utils.mtgo import BASE_URL
+from scraper.utils.mtgo import BASE_URL, MAX_RETRIES
 
 
 def init_driver() -> webdriver.Chrome:
@@ -36,15 +36,25 @@ def get_mtgo_tournaments(
     month: int,
     sleep_time: int = 5,
 ) -> List[str]:
-    driver.get(BASE_URL + f"{year}/{month:02}")
-    time.sleep(sleep_time)
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    for attempt in range(MAX_RETRIES + 1):
+        driver.get(BASE_URL + f"{year}/{month:02}")
+        time.sleep(sleep_time)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
 
-    tournaments = []
-    for link in soup.select(
-        "#decklists > div.site-content > div.container-page-fluid.decklists-page > ul > li > a"
-    ):
-        href = str(link.get("href"))
-        full_url = f"https://www.mtgo.com{href}" if href.startswith("/") else href
-        tournaments.append(full_url)
+        tournaments = [
+            (
+                f"https://www.mtgo.com{str(link.get("href"))}"
+                if str(link.get("href")).startswith("/")
+                else str(link.get("href"))
+            )
+            for link in soup.select(
+                "#decklists > div.site-content > div.container-page-fluid.decklists-page > ul > li > a"
+            )
+        ]
+
+        sleep_time *= 2
+
+        if tournaments:
+            break
+
     return tournaments

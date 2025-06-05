@@ -71,7 +71,6 @@ def consumer(
     lock: Lock,
     thread_id: int,
     retries: defaultdict[str, int],
-    max_retries: int = 3,
 ):
     while True:
         with lock:
@@ -93,11 +92,15 @@ def consumer(
                 with lock:
                     retries[url_task] += 1
                     retry = retries[url_task]
-                    if retry < max_retries:
-                        print(f"↩️ Retrying {url_task} ({retry}/{max_retries})")
+                    if retry < mtgo_utils.MAX_RETRIES:
+                        print(
+                            f"↩️ Retrying {url_task} ({retry}/{mtgo_utils.MAX_RETRIES})"
+                        )
                         queue.put(url_task)
                     else:
-                        print(f"⏭️ Skipping {url_task} after {max_retries} attempts.")
+                        print(
+                            f"⏭️ Skipping {url_task} after {mtgo_utils.MAX_RETRIES} attempts."
+                        )
                         queue.task_done()
         except Exception as e:
             print(f"❌ Error on Thread-{thread_id} handling {url_task}: {e}")

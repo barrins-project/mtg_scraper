@@ -13,6 +13,7 @@ from scraper.schemas import MTGScrape
 
 BASE_URL = "https://www.mtgo.com/decklists/"
 BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgo.com"
+MAX_RETRIES = 3
 
 
 def we_should_scrape_it(tournament_url: str, max_days_to_be_recent: int = 3) -> bool:
