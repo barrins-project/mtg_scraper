@@ -27,6 +27,7 @@ dependencies = [
     "webdriver-manager", # MTGO Scrapping needs navigator simulating
     "pydantic",
     "pandas",
+    "lxml",
 ]
 
 [project.optional-dependencies]
