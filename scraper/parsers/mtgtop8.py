@@ -153,6 +153,8 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
             result = int(result_text.split("-")[0])
             break
 
+    ai_interpretation = get_notes(deck_id)
+
     mainboard, sideboard = get_decklist(deck_id)
     if not mainboard:
         raise ValueError("Mainboard not found")
@@ -166,7 +168,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
             anchor_uri=f"https://mtgtop8.com/event{href}",
             mainboard=mainboard,
             sideboard=sideboard,
-            notes=get_notes(deck_id),
+            notes=ai_interpretation,
         ),
     )
 
@@ -199,11 +201,6 @@ def get_deck_out_top8(deck_tag: Tag) -> Tuple[int, Deck]:
 
 
 def get_decklist(deck_id: int) -> Tuple[List[CardEntry], List[CardEntry]]:
-    # First call, sometimes necessary to force the server to return the decklist
-    placebo_url = f"https://mtgtop8.com/event?e=1&d={deck_id}"
-    get_tournament_soup(placebo_url)
-
-    # Second call, this time we should get the decklist
     decklist_url = f"https://mtgtop8.com/mtgo?d={deck_id}"
     decklist_soup = str(get_tournament_soup(decklist_url).prettify())
 
