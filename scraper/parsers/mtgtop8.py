@@ -1,7 +1,7 @@
 import re
 import time
 from datetime import date, datetime
-from typing import List, Mapping, Tuple, cast
+from typing import List, Mapping, Optional, Tuple, cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -18,6 +18,8 @@ HEADERS = {
         + "Gecko/20100101 Firefox/52.0"
     ),
 }
+
+MTGTOP8_AI_DISCLAIMER = """<div class="G12" style="margin-bottom:10px;">The following text was generated with ChatGPT, the results are usually useful, but can sometimes miss the mark. Use it at your own risk.</div>"""
 
 
 def get_tournament_soup(
@@ -164,6 +166,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
             anchor_uri=f"https://mtgtop8.com/event{href}",
             mainboard=mainboard,
             sideboard=sideboard,
+            notes=get_notes(deck_id),
         ),
     )
 
@@ -190,6 +193,7 @@ def get_deck_out_top8(deck_tag: Tag) -> Tuple[int, Deck]:
             anchor_uri="",
             mainboard=mainboard,
             sideboard=sideboard,
+            notes=get_notes(deck_id),
         ),
     )
 
@@ -243,3 +247,28 @@ def sanitize_cardname(card_name: str) -> str:
     # May increase later
 
     return card_name
+
+
+def get_notes(deck_id: int) -> Optional[str]:
+    deck_url = f"https://mtgtop8.com/event?e=1&d={deck_id}&explain_deck=Y"
+
+    data = requests.get(deck_url, headers=HEADERS)
+    data.raise_for_status()
+
+    if data.status_code == 200:
+        soup = BeautifulSoup(data.text, "html.parser")
+        notes_div: Tag = cast(Tag, soup.find("div", class_="S16"))
+        if notes_div:
+            card_span = r"<span[^>]*>.*?<a[^>]*>(.*?)</a>.*?</span>"
+            return re.sub(
+                card_span,
+                r"\1",
+                innerHTML(notes_div),
+                flags=re.DOTALL,
+            ).replace(MTGTOP8_AI_DISCLAIMER, "")
+
+    return None
+
+
+def innerHTML(element: Tag) -> str:
+    return str(element.decode_contents())

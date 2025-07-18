@@ -16,3 +16,4 @@ class Deck(BaseModel):
     anchor_uri: str
     mainboard: List[CardEntry]
     sideboard: Optional[List[CardEntry]] = None
+    notes: Optional[str] = None
