@@ -1,3 +1,4 @@
+import argparse
 from collections import defaultdict
 from queue import Queue
 from threading import Lock, Thread
@@ -11,10 +12,15 @@ def rescrape_files(
     chunk_size: int = 1000,
     batch_size: int = 10,
     num_threads: int = 4,
+    chunk_by_chunk: bool = True,
 ):
-    scraped_ids: List[int] = [
-        get_id_from_filepath(json_file) for json_file in BASE_PATH.rglob("*.json")
-    ]
+    scraped_ids: List[int] = sorted(
+        [get_id_from_filepath(json_file) for json_file in BASE_PATH.rglob("*.json")]
+    )
+
+    if not scraped_ids:
+        print("No scraped files found. Exiting.")
+        return
 
     check = input(f"Do you want to rescrape all {len(scraped_ids)} files? (y/n): ")
     if check.lower() != "y":
@@ -53,7 +59,49 @@ def rescrape_files(
 
         print("✅ Finished chunk")
 
+        if chunk_by_chunk:
+            input("Press Enter to continue to the next chunk...")
+            print("🔁 Continuing to the next chunk...")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Ré-extraction des tournois MTGTop8.")
+
+    parser.add_argument(
+        "--chunk-size",
+        type=int,
+        default=1000,
+        help="Taille des chunks à traiter (par défaut: 1000).",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=10,
+        help="Taille des batches à traiter (par défaut: 10).",
+    )
+    parser.add_argument(
+        "--num-threads",
+        type=int,
+        default=4,
+        help="Nombre de threads à utiliser (par défaut: 4).",
+    )
+    parser.add_argument(
+        "--chunk-by-chunk",
+        action="store_true",
+        help="Pause entre les chunks pour permettre une vérification manuelle.",
+    )
+
+    args = parser.parse_args()
+
+    rescrape_files(
+        chunk_size=args.chunk_size,
+        batch_size=args.batch_size,
+        num_threads=args.num_threads,
+        chunk_by_chunk=args.chunk_by_chunk,
+    )
+
+    print("🎉 All tournaments reprocessed.")
+
 
 if __name__ == "__main__":
-    rescrape_files()
-    print("🎉 All tournaments reprocessed.")
+    main()
