@@ -85,17 +85,27 @@ def rescrape_files(
     if dry_run:
         rescrape_ids = get_ids_to_rescrape(files, keys_to_check, batch_size)
         print(f"💡 Dry run mode — {len(rescrape_ids)} IDs to rescrape:")
-        print(rescrape_ids)
+        print(rescrape_ids[:50])
+        if len(rescrape_ids) > 50:
+            print(f"... and {len(rescrape_ids) - 50} more.")
         return
 
-    check = input(f"Do you want to reprocess all {len(files)} files? (y/n): ")
+    check = (
+        input(f"Do you want to check all {len(files)} files? (y/n): ")
+        if target
+        else input(f"Do you want to reprocess all {len(files)} files? (y/n): ")
+    )
     if check.lower() != "y":
         print("Aborting rescrape.")
         return
 
     for chunk_start in range(0, len(files), chunk_size):
-        print(f"\n🔁 Processing chunk {chunk_start} to {chunk_start + chunk_size}")
         chunk_files = files[chunk_start : chunk_start + chunk_size]
+        print(
+            f"\n⛏️ Chunk {get_id_from_filepath(chunk_files[0])} to {get_id_from_filepath(chunk_files[-1])}"
+        )
+        if chunk_by_chunk:
+            input("Press Enter to start processing this chunk...")
 
         chunk_ids: List[int] = get_ids_to_rescrape(
             files=chunk_files,
@@ -129,10 +139,11 @@ def rescrape_files(
         for t in consumer_threads:
             t.join()
 
-        print("✅ Finished chunk")
+        print(
+            f"✅ Finished chunk {get_id_from_filepath(chunk_files[0])} to {get_id_from_filepath(chunk_files[-1])}"
+        )
 
-        if chunk_by_chunk:
-            input("Press Enter to continue to the next chunk...")
+        if chunk_by_chunk and chunk_start + chunk_size < len(files):
             print("🔁 Continuing to the next chunk...")
 
 
