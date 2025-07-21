@@ -143,7 +143,7 @@ def rescrape_files(
             f"✅ Finished chunk {get_id_from_filepath(chunk_files[0])} to {get_id_from_filepath(chunk_files[-1])}"
         )
 
-        if chunk_by_chunk and chunk_start + chunk_size < len(files):
+        if chunk_start + chunk_size < len(files):
             print("🔁 Continuing to the next chunk...")
 
 
