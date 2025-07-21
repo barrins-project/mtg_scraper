@@ -69,7 +69,10 @@ def rescrape_files(
     target: Optional[str],
     dry_run: bool,
 ):
-    files = sorted(list(BASE_PATH.rglob("*.json")))
+    files = sorted(
+        list(BASE_PATH.rglob("*.json")),
+        key=lambda x: get_id_from_filepath(x),
+    )
     if not files:
         print("No JSON files found in the base path. Exiting.")
         return
@@ -150,7 +153,7 @@ def get_ids_to_rescrape(
                     continue
 
                 if keys_to_check:
-                    if has_nested_key(data, keys_to_check):
+                    if not has_nested_key(data, keys_to_check):
                         yield get_id_from_filepath(file)
                 else:
                     yield get_id_from_filepath(file)
