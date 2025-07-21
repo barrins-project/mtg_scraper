@@ -10,48 +10,55 @@ from scraper.services.mtgtop8 import consumer, producer
 from scraper.utils.mtgtop8 import BASE_PATH, get_id_from_filepath
 
 
-def has_nested_key(data: dict, keys: List[str]) -> bool:
-    """Vérifie si des clés imbriquées existent dans un dictionnaire JSON."""
-    d = data
-    for key in keys:
-        if not isinstance(d, dict) or key not in d:
-            return False
-        d = d[key]
-    return True
+def main():
+    parser = argparse.ArgumentParser(description="Rescrape MTG Top8 files.")
+    parser.add_argument(
+        "--chunk-size",
+        type=int,
+        default=1000,
+        help="Number of files to process in each chunk.",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=10,
+        help="Number of files to process in each batch.",
+    )
+    parser.add_argument(
+        "--num-threads",
+        type=int,
+        default=4,
+        help="Number of threads to use for processing.",
+    )
+    parser.add_argument(
+        "--target",
+        type=str,
+        default=None,
+        help="Key to check in JSON files (e.g., 'decks>notes').",
+    )
+    parser.add_argument(
+        "--chunk-by-chunk",
+        action="store_true",
+        help="Pause between chunks for manual verification.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Display targeted IDs without launching threads.",
+    )
 
+    args = parser.parse_args()
 
-def get_ids_to_rescrape(
-    files: List[Path],
-    keys_to_check: Optional[List[str]],
-    batch_size: int,
-) -> List[int]:
-    rescrape_ids: List[int] = []
+    rescrape_files(
+        chunk_size=args.chunk_size,
+        batch_size=args.batch_size,
+        num_threads=args.num_threads,
+        chunk_by_chunk=args.chunk_by_chunk,
+        target=args.target,
+        dry_run=args.dry_run,
+    )
 
-    def batch_process(files_chunk: List[Path]) -> Generator[int, Any, None]:
-        for file in files_chunk:
-            try:
-                with open(file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if not data:
-                    print(f"File {file} is empty or invalid. Skipping.")
-                    continue
-
-                if keys_to_check:
-                    if has_nested_key(data, keys_to_check):
-                        yield get_id_from_filepath(file)
-                else:
-                    yield get_id_from_filepath(file)
-
-            except Exception as e:
-                print(f"⚠️ Error reading {file}: {e}")
-                continue
-
-    for i in range(0, len(files), batch_size):
-        files_batch = files[i : i + batch_size]
-        for file_id in batch_process(files_batch):
-            rescrape_ids.append(file_id)
-
-    return rescrape_ids
+    print("🎉 All tournaments reprocessed.")
 
 
 def rescrape_files(
@@ -126,55 +133,50 @@ def rescrape_files(
             print("🔁 Continuing to the next chunk...")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Rescrape MTG Top8 files.")
-    parser.add_argument(
-        "--chunk-size",
-        type=int,
-        default=1000,
-        help="Number of files to process in each chunk. (Default: 1000)",
-    )
-    parser.add_argument(
-        "--batch-size",
-        type=int,
-        default=10,
-        help="Number of files to process in each batch. (Default: 10)",
-    )
-    parser.add_argument(
-        "--num-threads",
-        type=int,
-        default=4,
-        help="Number of threads to use for processing. (Default: 4)",
-    )
-    parser.add_argument(
-        "--target",
-        type=str,
-        default=None,
-        help="Key to check in JSON files (e.g., 'decks>notes').",
-    )
-    parser.add_argument(
-        "--chunk-by-chunk",
-        action="store_true",
-        help="Pause between chunks for manual verification.",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Display targeted IDs without launching threads.",
-    )
+def get_ids_to_rescrape(
+    files: List[Path],
+    keys_to_check: Optional[List[str]],
+    batch_size: int,
+) -> List[int]:
+    rescrape_ids: List[int] = []
 
-    args = parser.parse_args()
+    def batch_process(files_chunk: List[Path]) -> Generator[int, Any, None]:
+        for file in files_chunk:
+            try:
+                with open(file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if not data:
+                    print(f"File {file} is empty or invalid. Skipping.")
+                    continue
 
-    rescrape_files(
-        chunk_size=args.chunk_size,
-        batch_size=args.batch_size,
-        num_threads=args.num_threads,
-        chunk_by_chunk=args.chunk_by_chunk,
-        target=args.target,
-        dry_run=args.dry_run,
-    )
+                if keys_to_check:
+                    if has_nested_key(data, keys_to_check):
+                        yield get_id_from_filepath(file)
+                else:
+                    yield get_id_from_filepath(file)
 
-    print("🎉 All tournaments reprocessed.")
+            except Exception as e:
+                print(f"⚠️ Error reading {file}: {e}")
+                continue
+
+    for i in range(0, len(files), batch_size):
+        files_batch = files[i : i + batch_size]
+        for file_id in batch_process(files_batch):
+            rescrape_ids.append(file_id)
+
+    return rescrape_ids
+
+
+def has_nested_key(data: dict, keys: List[str]) -> bool:
+    """Vérifie si des clés imbriquées existent dans un dictionnaire JSON."""
+    d = data
+    for key in keys:
+        if isinstance(d, list):
+            d = d[0] if d else {}
+        if not isinstance(d, dict) or key not in d:
+            return False
+        d = d[key]
+    return True
 
 
 if __name__ == "__main__":
