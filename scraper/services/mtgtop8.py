@@ -2,17 +2,21 @@ import time
 from collections import defaultdict
 from queue import Queue
 from threading import Lock, Thread
-from typing import DefaultDict
+from typing import DefaultDict, Tuple
+
+from bs4 import BeautifulSoup
 
 from scraper.parsers import mtgtop8 as parser
 from scraper.utils import mtgtop8_utils
+
+type Top8Queue = Queue[Tuple[str, BeautifulSoup]]
 
 
 def scrape_mtgtop8(
     span: int = 1000,
     num_threads: int = 4,
-):
-    task_queue = Queue()
+) -> None:
+    task_queue: Top8Queue = Queue()
     lock = Lock()
     retries: DefaultDict[str, int] = defaultdict(int)
 
@@ -49,9 +53,9 @@ def scrape_mtgtop8(
 
 def producer(
     id_to_scrape: int,
-    queue: Queue,
+    queue: Top8Queue,
     lock: Lock,
-):
+) -> None:
     try:
         tournament_url = mtgtop8_utils.get_tournament_url(id_to_scrape)
         tournament_soup = mtgtop8_utils.get_tournament_soup(tournament_url)
@@ -74,12 +78,12 @@ def producer(
 
 
 def consumer(
-    queue: Queue,
+    queue: Top8Queue,
     lock: Lock,
     thread_id: int,
     retries: defaultdict[str, int],
     max_retries: int = 3,
-):
+) -> None:
     while True:
         with lock:
             if queue.empty():

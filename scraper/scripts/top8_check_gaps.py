@@ -3,7 +3,7 @@ from queue import Queue
 from threading import Lock, Thread
 from typing import DefaultDict, List
 
-from scraper.services.mtgtop8 import consumer, producer
+from scraper.services.mtgtop8 import Top8Queue, consumer, producer
 from scraper.utils import mtgtop8_utils
 
 
@@ -23,7 +23,7 @@ def scrape_gaps(
     chunk_size: int = 100,
     batch_size: int = 10,
     num_threads: int = 4,
-):
+) -> None:
     missing_ids = get_gaps()
     print(f"❌ Found {len(missing_ids)} missing tournaments.")
     if not missing_ids:
@@ -34,7 +34,7 @@ def scrape_gaps(
         print(f"\n🔁 Processing chunk {chunk_start} to {chunk_start + chunk_size}")
         chunk_ids = missing_ids[chunk_start : chunk_start + chunk_size]
 
-        task_queue = Queue()
+        task_queue: Top8Queue = Queue()
         lock = Lock()
         retries: DefaultDict[str, int] = defaultdict(int)
 

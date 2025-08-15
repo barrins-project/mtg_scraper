@@ -1,7 +1,7 @@
 import json
 from io import StringIO
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 
 import pandas as pd
 import requests
@@ -36,29 +36,27 @@ def get_tables_from_url(url: str) -> List[pd.DataFrame]:
 def get_player_details(player_row: pd.Series) -> CircuitPlayer:
     surname = str(player_row["Nom"])
     name = str(player_row["Prénom"])
-    pseudo = None
+    pseudo = ""
     if not surname or not name:
-        surname, name, pseudo = None, None, surname or name
+        surname, name, pseudo = "", "", surname or name
 
     is_regional_qualifier = "CR" in str(player_row["CR / Open"])
     is_open_qualifier = "Open" in str(player_row["CR / Open"])
 
-    player = CircuitPlayer(
-        **{
-            "surname": surname,
-            "name": name,
-            "alias": pseudo,
-            "is_challenger": "Challenger" in str(player_row["Type de Qualif"]),
-            "is_invited": "Invité" in str(player_row["Type de Qualif"]),
-            "region": str(player_row["Région"]),
-            "tournament": str(player_row["Tournoi de Qualification"]),
-            "is_regional_qualifier": is_regional_qualifier,
-            "is_open_qualifier": is_open_qualifier,
-            "is_other": not (is_regional_qualifier or is_open_qualifier),
-        }
-    )
+    scraped_data: Dict[str, Any] = {
+        "surname": surname,
+        "name": name,
+        "alias": pseudo,
+        "is_challenger": "Challenger" in str(player_row["Type de Qualif"]),
+        "is_invited": "Invité" in str(player_row["Type de Qualif"]),
+        "region": str(player_row["Région"]),
+        "tournament": str(player_row["Tournoi de Qualification"]),
+        "is_regional_qualifier": is_regional_qualifier,
+        "is_open_qualifier": is_open_qualifier,
+        "is_other": not (is_regional_qualifier or is_open_qualifier),
+    }
 
-    return player
+    return CircuitPlayer.from_raw(scraped_data)
 
 
 def save_players_to_file(players: List[CircuitPlayer]) -> None:

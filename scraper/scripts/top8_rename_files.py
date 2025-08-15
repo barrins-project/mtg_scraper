@@ -5,7 +5,7 @@ from typing import Mapping
 from scraper.utils.mtgtop8 import BASE_PATH, sanitize_string
 
 
-def rename_existing_files():
+def rename_existing_files() -> None:
     for json_file in BASE_PATH.rglob("*.json"):
         try:
             with open(json_file, encoding="utf-8") as f:

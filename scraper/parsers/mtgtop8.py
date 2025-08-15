@@ -1,7 +1,7 @@
 import re
 import time
 from datetime import date, datetime
-from typing import List, Mapping, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -46,7 +46,7 @@ def tournament(tournament_url: str, tournament_soup: BeautifulSoup) -> Tournamen
 
 
 def decks(tournament_soup: BeautifulSoup) -> List[Deck]:
-    decks_dict: Mapping[int, Deck] = {}
+    decks_dict: Dict[int, Deck] = {}
 
     top8_tags = tournament_soup.select(
         ".chosen_tr div.S14 a[href^='?e='], .hover_tr div.S14 a[href^='?e=']"
@@ -129,6 +129,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
     player_name = "Unknown Player"
     result = 0
     current = deck_tag
+    container: Tag = Tag()
     for _ in range(4):
         parent_div = current.find_parent("div")
         if not parent_div:

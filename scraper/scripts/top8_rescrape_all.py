@@ -6,11 +6,11 @@ from queue import Queue
 from threading import Lock, Thread
 from typing import Any, DefaultDict, Generator, List, Optional
 
-from scraper.services.mtgtop8 import consumer, producer
+from scraper.services.mtgtop8 import Top8Queue, consumer, producer
 from scraper.utils.mtgtop8 import BASE_PATH, get_id_from_filepath
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Rescrape MTG Top8 files.")
     parser.add_argument(
         "--chunk-size",
@@ -68,7 +68,7 @@ def rescrape_files(
     chunk_by_chunk: bool,
     target: Optional[str],
     dry_run: bool,
-):
+) -> None:
     files = sorted(
         list(BASE_PATH.rglob("*.json")),
         key=lambda x: get_id_from_filepath(x),
@@ -113,7 +113,7 @@ def rescrape_files(
             batch_size=batch_size,
         )
 
-        task_queue = Queue()
+        task_queue: Top8Queue = Queue()
         lock = Lock()
         retries: DefaultDict[str, int] = defaultdict(int)
 

@@ -71,6 +71,7 @@ def get_date(soup: BeautifulSoup) -> Optional[date]:
             return None
     except Exception as e:
         print(f"❌ Erreur inattendue dans get_date : {e}")
+        return None
 
 
 def get_name(soup: BeautifulSoup) -> str:
@@ -138,8 +139,8 @@ def get_deck(deck_section: Tag, url: str) -> Deck:
 
 
 def get_round(round_block: Tag) -> Round:
-    round_name = round_block.select_one(".decklist-bracket-round-title")
-    round_name = round_name.get_text(strip=True) if round_name else "Unknown Round"
+    round_tag = round_block.select_one(".decklist-bracket-round-title")
+    round_name = round_tag.get_text(strip=True) if round_tag else "Unknown Round"
 
     return Round(
         round_name=round_name,

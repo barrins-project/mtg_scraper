@@ -36,18 +36,19 @@ def get_mtgo_tournaments(
     month: int,
     sleep_time: int = 5,
 ) -> List[str]:
+    tournaments: List[str] = []
+
     for _ in range(MAX_RETRIES + 1):
         driver.get(BASE_URL + f"{year}/{month:02}")
         time.sleep(sleep_time)
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        tournaments = []
         for link in soup.select(
             "#decklists > div.site-content > div.container-page-fluid.decklists-page > ul > li > a"
         ):
             href = str(link.get("href"))
-            link = f"https://www.mtgo.com{href}" if href.startswith("/") else href
-            tournaments.append(link)
+            t_link = f"https://www.mtgo.com{href}" if href.startswith("/") else href
+            tournaments.append(t_link)
 
         sleep_time *= 2
 

@@ -35,10 +35,10 @@ def get_tournament_url(tournament_id: int) -> str:
 
 
 def we_should_scrape_it(tournament_url: str) -> bool:
-    tournament_id = tournament_url.split("e=")[1]
-    if "&" in tournament_id:
-        tournament_id = tournament_id.split("&")[0]
-    tournament_id = int(tournament_id)
+    tournament_query = tournament_url.split("e=")[1]
+    if "&" in tournament_query:
+        tournament_query = tournament_query.split("&")[0]
+    tournament_id = int(tournament_query)
 
     return tournament_id not in [
         int(f.stem.split("_")[0]) for f in BASE_PATH.glob("*.json") if f.is_file()

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from scraper import services
 
 
-def main():
+def main() -> None:
     today = datetime.now().strftime("%Y-%m")
     five_days_ago = (datetime.now() - timedelta(days=5)).strftime("%Y-%m")
 

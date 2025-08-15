@@ -5,7 +5,7 @@ from queue import Queue
 from threading import Lock, Thread
 from typing import DefaultDict, List
 
-from scraper.services.mtgo import consumer
+from scraper.services.mtgo import MTGTOQueue, consumer
 from scraper.utils import driver_utils, mtgo_utils
 
 
@@ -31,8 +31,8 @@ def get_tournaments_without_decks(queue: Queue, lock: Lock) -> None:
 
 def scrape_tournaments_without_decks(
     num_threads: int = 4,
-):
-    task_queue = Queue()
+) -> None:
+    task_queue: MTGTOQueue = Queue()
     lock = Lock()
     drivers = [driver_utils.init_driver() for _ in range(num_threads)]
     retries: DefaultDict[str, int] = defaultdict(int)

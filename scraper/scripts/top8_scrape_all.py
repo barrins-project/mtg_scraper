@@ -11,7 +11,7 @@ def count_files() -> int:
         return 0
 
 
-def main():
+def main() -> None:
     nb_files_before = count_files()
     print(f"Initial number of tournaments: {nb_files_before}")
 
