@@ -129,7 +129,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
     player_name = "Unknown Player"
     result = 0
     current = deck_tag
-    container: Tag = Tag()
+    container: Tag = Tag(name="container")
     for _ in range(4):
         parent_div = current.find_parent("div")
         if not parent_div:
