@@ -33,6 +33,12 @@ def main() -> None:
         help="Date de fin (format YYYY-MM)",
         default=today,
     )
+    parser.add_argument(
+        "--span",
+        type=int,
+        help="Nombre de tournois à inspecter",
+        default=1000,
+    )
 
     args = parser.parse_args()
 
@@ -46,7 +52,7 @@ def main() -> None:
     if args.source == "mtgo":
         services.mtgo(date_from, date_to)
     if args.source == "mtgtop8":
-        services.mtgtop8()
+        services.mtgtop8(args.span)
     if args.source == "mtgprime":
         services.mtgprime()
 
