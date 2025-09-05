@@ -16,6 +16,7 @@ type MTGTOQueue = Queue[str]
 def scrape_mtgo(
     date_from: date,
     date_to: date,
+    force: bool = False,
     num_threads: int = 4,
 ) -> None:
     task_queue: MTGTOQueue = Queue()
@@ -25,7 +26,7 @@ def scrape_mtgo(
 
     producer_thread = Thread(
         target=producer,
-        args=(task_queue, date_from, date_to, drivers[0], lock),
+        args=(task_queue, date_from, date_to, drivers[0], lock, force),
     )
 
     consumer_threads = [
@@ -50,6 +51,7 @@ def producer(
     date_to: date,
     driver: WebDriver,
     lock: Lock,
+    force: bool = False,
 ) -> None:
     try:
         print("⚙️ Retrieving MTGO tournament links...")
@@ -57,7 +59,7 @@ def producer(
             tournaments_links = driver_utils.get_mtgo_tournaments(driver, year, month)
             to_scrape = 0
             for link in tournaments_links:
-                if mtgo_utils.we_should_scrape_it(link):
+                if force or mtgo_utils.we_should_scrape_it(link):
                     to_scrape += 1
                     with lock:
                         queue.put(link)

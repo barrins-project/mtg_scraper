@@ -39,6 +39,12 @@ def main() -> None:
         help="Nombre de tournois à inspecter",
         default=1000,
     )
+    parser.add_argument(
+        "--force-mtgo",
+        action="store_true",
+        help="Force re-scraping of MTGO tournaments (default: False)",
+        default=False,
+    )
 
     args = parser.parse_args()
 
@@ -50,7 +56,7 @@ def main() -> None:
         return
 
     if args.source == "mtgo":
-        services.mtgo(date_from, date_to)
+        services.mtgo(date_from, date_to, args.force_mtgo)
     if args.source == "mtgtop8":
         services.mtgtop8(args.span)
     if args.source == "mtgprime":
