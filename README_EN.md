@@ -46,8 +46,10 @@ scrape --source mtgtop8 --date-from 2024-05 --date-to 2024-12
 | Parameter     | Description                               | Default Value |
 | ------------- | ----------------------------------------- | ------------- |
 | `--source`    | Source to scrape: `mtgo` or `mtgtop8`     | `mtgo`        |
-| `--date-from` | Start date (`YYYY-MM` format) (MTGO only) | 5 days ago    |
-| `--date-to`   | End date (`YYYY-MM` format) (MTGO only)   | Today         |
+| `--date-from` | Start date (`YYYY-MM` format) *(**MTGO** only)* | 5 days ago    |
+| `--date-to`   | End date (`YYYY-MM` format) *(**MTGO** only)   | Today         |
+| `--force-mtgo`| Force recraping *(**MTGO** only)   | False         |
+| `--span`   | Number of tournaments to inspect *(**MTGTOP8** only)   | 1000         |
 
 ### 3. Example in Code
 
