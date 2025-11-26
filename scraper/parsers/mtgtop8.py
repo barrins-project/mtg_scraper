@@ -26,7 +26,7 @@ def get_tournament_soup(
     tournament_url: str, encoding: str = "iso-8859-1"
 ) -> BeautifulSoup:
     time.sleep(0.5)  # Avoid being blocked by the server
-    req = requests.get(tournament_url, HEADERS, stream=True, timeout=5000)
+    req = requests.get(tournament_url, HEADERS, stream=True, timeout=10_000)
     req.encoding = encoding
     return BeautifulSoup(req.content, "html.parser", from_encoding=encoding)
 
