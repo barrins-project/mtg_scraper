@@ -44,18 +44,20 @@ jobs:
         run: |
           DATE=$(date -u +"%Y-%m-%d")
 
-          # Se déplacer dans le submodule
-          cd $(git config --file .gitmodules --get-regexp path | awk '{print $2}')
+          SUBMODULE_PATH=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
+          cd "$SUBMODULE_PATH"
 
-          # Vérifier s'il y a des changements
+          BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+          git checkout "$BRANCH"
+
           if [[ -n $(git status --porcelain) ]]; then
             git add .
             git commit -m "$DATE Daily Scraping"
-            git push
+            git push origin "$BRANCH"
 
             # Retourner au repo principal et mettre à jour la référence du submodule
             cd ..
-            git add .
+            git add "$SUBMODULE_PATH"
             git commit -m "$DATE Update scraping data submodule"
             git push
 
