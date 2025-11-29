@@ -1,0 +1,107 @@
+name: Daily Scraping
+
+on:
+  schedule:
+    # Exécution tous les jours à 22h UTC (23h GMT+1)
+    - cron: '0 22 * * *'
+  workflow_dispatch: # Permet de déclencher manuellement le workflow
+
+jobs:
+  scrape-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Ajustez selon votre version
+          cache: 'pip'
+
+      - name: Install project
+        run: |
+          pip install --upgrade pip
+          pip install -e .
+
+      - name: Run scraping - MTGO
+        run: scrape --source mtgo
+
+      - name: Run scraping - MTGTop8
+        run: scrape --source mtgtop8
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Commit and push scraped data
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+
+          # Se déplacer dans le submodule
+          cd $(git config --file .gitmodules --get-regexp path | awk '{print $2}')
+
+          # Vérifier s'il y a des changements
+          if [[ -n $(git status --porcelain) ]]; then
+            git add .
+            git commit -m "$DATE Daily Scraping"
+            git push
+
+            # Retourner au repo principal et mettre à jour la référence du submodule
+            cd ..
+            git add .
+            git commit -m "$DATE Update scraping data submodule"
+            git push
+
+            echo "✅ Scraping completed and pushed successfully"
+          else
+            echo "ℹ️ No changes detected in scraped data"
+          fi
+
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "✅ Daily Scraping Success - ${{ github.run_id }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: ${{ secrets.GMAIL_USERNAME }}
+          body: |
+            Le scraping quotidien s'est terminé avec succès.
+
+            Date: ${{ github.event.repository.updated_at }}
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+
+            Consultez les détails: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "❌ Daily Scraping Failed - ${{ github.run_id }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: ${{ secrets.GMAIL_USERNAME }}
+          body: |
+            ⚠️ Le scraping quotidien a échoué.
+
+            Date: ${{ github.event.repository.updated_at }}
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+
+            Consultez les logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
