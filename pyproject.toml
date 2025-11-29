@@ -12,7 +12,7 @@ description = "Scraper for decklists and tournaments data from differente source
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["mtg", "Magic: the Gathering", "CCG", "Scraper"]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
