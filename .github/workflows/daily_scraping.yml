@@ -33,7 +33,7 @@ jobs:
         run: scrape --source mtgo
 
       - name: Run scraping - MTGTop8
-        run: scrape --source mtgtop8
+        run: scrape --source mtgtop8 --span 300
 
       - name: Configure Git
         run: |
