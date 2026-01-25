@@ -9,6 +9,7 @@ class Formats(Enum):
     VINTAGE = "Vintage"
     DUEL_COMMANDER = "Duel Commander"
     PAUPER = "Pauper"
+    PREMODERN = "Premodern"
 
 
 FORMATS = [mtg_format.value for mtg_format in Formats]
