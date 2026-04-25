@@ -30,6 +30,10 @@ cd mtg_scraper
 python -m venv venv
 source venv/bin/activate  # ou .\venv\Scripts\activate sous Windows
 pip install .
+
+# Initialisation du sous-module de réception des données
+git submodule init
+git submodule update
 ```
 
 ### 2. Lancement en CLI
@@ -43,13 +47,13 @@ scrape --source mtgtop8 --date-from 2024-05 --date-to 2024-12
 
 #### Options
 
-| Paramètre     | Description                                        | Valeur par défaut |
-| ------------- | -------------------------------------------------- | ----------------- |
-| `--source`    | Source des tournois : `mtgo` ou `mtgtop8`          | `mtgo`            |
-| `--date-from` | Date de début (format `YYYY-MM`) *(**MTGO** uniquement)* | 5 jours avant     |
-| `--date-to`   | Date de fin (format `YYYY-MM`) *(**MTGO** uniquement)*   | aujourd’hui       |
-| `--force-mtgo` | Force le re-scrape des tournois déjà récupérés *(**MTGO** uniquement)*   | Faux |
-| `--span`   | Nombre de tournois à inspecter *(**MTGTOP8** uniquement)*   | 1000 |
+| Paramètre | Description | Valeur par défaut |
+| --------- | ----------- | ----------------- |
+| `--source` | Source des tournois : `mtgo` ou `mtgtop8` | `mtgo` |
+| `--date-from` | Date de début (format `YYYY-MM`) *(**MTGO** uniquement)* | 5 jours avant |
+| `--date-to` | Date de fin (format `YYYY-MM`) *(**MTGO** uniquement)* | aujourd’hui |
+| `--force-mtgo` | Force le re-scrape des tournois déjà récupérés *(**MTGO** uniquement)* | Faux |
+| `--span` | Nombre de tournois à inspecter *(**MTGTOP8** uniquement)* | 1000 |
 
 ### 3. Exemple de code
 
