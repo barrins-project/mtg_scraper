@@ -1,0 +1,146 @@
+name: Biweekly Sunday Scripts
+
+on:
+  schedule:
+    # Exécution chaque dimanche à 22h UTC :
+    # - semaines paires  → top8_check_gaps
+    # - semaines impaires → mtgo_empty_decks
+    - cron: '0 22 * * 0'
+  workflow_dispatch:
+    inputs:
+      script:
+        description: 'Script à exécuter (check_gaps | empty_decks)'
+        required: false
+        default: ''
+
+jobs:
+  sunday-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Determine which script to run
+        id: which
+        run: |
+          WEEK=$(date +%V)
+          PARITY=$(( WEEK % 2 ))
+          INPUT="${{ github.event.inputs.script }}"
+
+          if [ "$INPUT" = "check_gaps" ]; then
+            echo "script=check_gaps" >> "$GITHUB_OUTPUT"
+          elif [ "$INPUT" = "empty_decks" ]; then
+            echo "script=empty_decks" >> "$GITHUB_OUTPUT"
+          elif [ "$PARITY" -eq 0 ]; then
+            echo "script=check_gaps" >> "$GITHUB_OUTPUT"
+          else
+            echo "script=empty_decks" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository with submodules
+        if: always()
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Python
+        if: always()
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install project
+        if: always()
+        run: |
+          pip install --upgrade pip
+          pip install -e .
+
+      - name: Run top8_check_gaps
+        if: steps.which.outputs.script == 'check_gaps'
+        run: python -m scraper.scripts.top8_check_gaps
+
+      - name: Run mtgo_empty_decks
+        if: steps.which.outputs.script == 'empty_decks'
+        run: python -m scraper.scripts.mtgo_empy_decks
+
+      - name: Configure Git
+        if: always()
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Commit and push scraped data
+        if: always()
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          SCRIPT="${{ steps.which.outputs.script }}"
+
+          if [ "$SCRIPT" = "check_gaps" ]; then
+            MSG="Biweekly Gap Fill"
+          else
+            MSG="Biweekly Empty Decks Fix"
+          fi
+
+          SUBMODULE_PATH=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
+          cd "$SUBMODULE_PATH"
+
+          BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+          git checkout "$BRANCH"
+
+          if [[ -n $(git status --porcelain) ]]; then
+            git add .
+            git commit -m "$DATE $MSG"
+            git push origin "$BRANCH"
+
+            cd ..
+            git add "$SUBMODULE_PATH"
+            git commit -m "$DATE Update scraping data submodule ($MSG)"
+            git push
+
+            echo "✅ Completed and pushed successfully"
+          else
+            echo "ℹ️ No changes detected"
+          fi
+
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "✅ Biweekly Sunday Script Success (${{ steps.which.outputs.script }}) - ${{ github.run_id }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: ${{ secrets.GMAIL_USERNAME }}
+          body: |
+            Le script bimensuel du dimanche (${{ steps.which.outputs.script }}) s'est terminé avec succès.
+
+            Date: ${{ github.event.repository.updated_at }}
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+
+            Consultez les détails: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "❌ Biweekly Sunday Script Failed (${{ steps.which.outputs.script }}) - ${{ github.run_id }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: ${{ secrets.GMAIL_USERNAME }}
+          body: |
+            ⚠️ Le script bimensuel du dimanche (${{ steps.which.outputs.script }}) a échoué.
+
+            Date: ${{ github.event.repository.updated_at }}
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+
+            Consultez les logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
