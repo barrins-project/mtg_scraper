@@ -13,6 +13,10 @@ on:
         required: false
         default: ''
 
+concurrency:
+  group: biweekly-sunday-scripts
+  cancel-in-progress: false
+
 jobs:
   sunday-script:
     runs-on: ubuntu-latest
@@ -90,12 +94,22 @@ jobs:
 
           if [[ -n $(git status --porcelain) ]]; then
             git add .
-            git commit -m "$DATE $MSG"
-            git push origin "$BRANCH"
+            git commit -m "$DATE $MSG" || true
+
+            # Integrate any remote commits pushed since we last fetched
+            git fetch origin "$BRANCH"
+            git pull --rebase origin "$BRANCH"
+
+            # Push; retry once if another concurrent run beat us to it
+            git push origin "$BRANCH" || \
+              (sleep 5 && git fetch origin "$BRANCH" && git pull --rebase origin "$BRANCH" && git push origin "$BRANCH")
 
             cd ..
             git add "$SUBMODULE_PATH"
-            git commit -m "$DATE Update scraping data submodule ($MSG)"
+            git commit -m "$DATE Update scraping data submodule ($MSG)" || true
+
+            git fetch origin
+            git pull --rebase
             git push
 
             echo "✅ Completed and pushed successfully"
