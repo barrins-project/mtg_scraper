@@ -7,7 +7,7 @@ from scraper.services.mtgtop8 import Top8Queue, consumer, producer
 from scraper.utils import mtgtop8_utils
 
 
-def get_gaps() -> List[int]:
+def get_gaps(max_gaps: int | None = 2000) -> List[int]:
     scrapes = [
         int(file.stem.split("_")[0])
         for file in list(mtgtop8_utils.BASE_PATH.rglob("*.json"))
@@ -16,15 +16,18 @@ def get_gaps() -> List[int]:
     max_id = max(scrapes)
     missings = list(set(range(1, max_id + 1)) - set(scrapes))
 
-    return sorted(missings)
+    if max_gaps is not None:
+        return sorted(missings, reverse=True)[:max_gaps]
+    return sorted(missings, reverse=True)
 
 
 def scrape_gaps(
+    max_missing: int = 2000,
     chunk_size: int = 100,
     batch_size: int = 10,
     num_threads: int = 4,
 ) -> None:
-    missing_ids = get_gaps()
+    missing_ids = get_gaps(max_missing)
     print(f"❌ Found {len(missing_ids)} missing tournaments.")
     if not missing_ids:
         print("🎉 No missing tournaments found.")
@@ -62,7 +65,7 @@ def scrape_gaps(
 
         print("✅ Finished chunk")
 
-    still_missing = get_gaps()
+    still_missing = get_gaps(max_gaps=None)
     print(f"❌ Still missing {len(still_missing)} tournaments.")
 
 
