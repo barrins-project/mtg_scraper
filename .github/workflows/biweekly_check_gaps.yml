@@ -93,16 +93,14 @@ jobs:
           git checkout "$BRANCH"
 
           if [[ -n $(git status --porcelain) ]]; then
-            git add .
-            git commit -m "$DATE $MSG" || true
-
-            # Integrate any remote commits pushed since we last fetched
             git fetch origin "$BRANCH"
-            git pull --rebase origin "$BRANCH"
-
-            # Push; retry once if another concurrent run beat us to it
-            git push origin "$BRANCH" || \
-              (sleep 5 && git fetch origin "$BRANCH" && git pull --rebase origin "$BRANCH" && git push origin "$BRANCH")
+            git reset --hard "origin/$BRANCH"
+            
+            if [[ -n $(git status --porcelain) ]]; then
+              git add .
+              git commit -m "$DATE $MSG" || true
+              git push origin "$BRANCH"
+            fi
 
             cd ..
             git add "$SUBMODULE_PATH"
