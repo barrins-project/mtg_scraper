@@ -53,7 +53,7 @@ jobs:
           if [[ -n $(git status --porcelain) ]]; then
             git add .
             git commit -m "$DATE Daily Scraping"
-            git push origin "$BRANCH"
+            git pull --rebase origin main && git push origin "$BRANCH"
 
             # Retourner au repo principal et mettre à jour la référence du submodule
             cd ..
