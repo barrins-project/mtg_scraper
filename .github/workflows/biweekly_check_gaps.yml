@@ -91,18 +91,21 @@ jobs:
 
           BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           git checkout "$BRANCH"
+          git pull origin "$BRANCH"
 
           if [[ -n $(git status --porcelain) ]]; then
             git fetch origin "$BRANCH"
             git reset --hard "origin/$BRANCH"
-            
+
             if [[ -n $(git status --porcelain) ]]; then
               git add .
               git commit -m "$DATE $MSG" || true
               git push origin "$BRANCH"
             fi
+          fi
 
-            cd ..
+          cd ..
+          if [[ -n $(git status --porcelain "$SUBMODULE_PATH") ]]; then
             git add "$SUBMODULE_PATH"
             git commit -m "$DATE Update scraping data submodule ($MSG)" || true
 

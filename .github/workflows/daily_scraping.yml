@@ -49,16 +49,19 @@ jobs:
 
           BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           git checkout "$BRANCH"
+          git pull origin "$BRANCH"
 
           if [[ -n $(git status --porcelain) ]]; then
             git add .
             git commit -m "$DATE Daily Scraping"
-            git pull --rebase origin main && git push origin "$BRANCH"
+            git push origin "$BRANCH"
+          fi
 
-            # Retourner au repo principal et mettre à jour la référence du submodule
-            cd ..
+          cd ..
+          if [[ -n $(git status --porcelain "$SUBMODULE_PATH") ]]; then
             git add "$SUBMODULE_PATH"
             git commit -m "$DATE Update scraping data submodule"
+            git pull --rebase origin main
             git push
 
             echo "✅ Scraping completed and pushed successfully"
@@ -71,7 +74,6 @@ jobs:
               -H "X-GitHub-Api-Version: 2022-11-28" \
               https://api.github.com/repos/${{ secrets.IMPORT_REPO }}/dispatches \
               -d '{"event_type":"scraping_completed"}'
-
           else
             echo "ℹ️ No changes detected in scraped data"
           fi
