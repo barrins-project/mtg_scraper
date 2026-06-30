@@ -18,6 +18,14 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Sync submodule to latest remote
+        run: |
+          SUBMODULE_PATH=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
+          cd "$SUBMODULE_PATH"
+          BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+          git checkout "$BRANCH"
+          git pull origin "$BRANCH"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -47,14 +55,10 @@ jobs:
           SUBMODULE_PATH=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
           cd "$SUBMODULE_PATH"
 
-          BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-          git checkout "$BRANCH"
-          git pull origin "$BRANCH"
-
           if [[ -n $(git status --porcelain) ]]; then
             git add .
             git commit -m "$DATE Daily Scraping"
-            git push origin "$BRANCH"
+            git push origin HEAD
           fi
 
           cd ..
