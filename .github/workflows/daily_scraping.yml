@@ -1,46 +1,17 @@
-name: Biweekly Sunday Scripts
+name: Daily Scraping
 
 on:
   schedule:
-    # Exécution chaque dimanche à 22h UTC :
-    # - semaines paires  → top8_check_gaps
-    # - semaines impaires → mtgo_empty_decks
-    - cron: '0 22 * * 0'
-  workflow_dispatch:
-    inputs:
-      script:
-        description: 'Script à exécuter (check_gaps | empty_decks)'
-        required: false
-        default: ''
-
-concurrency:
-  group: biweekly-sunday-scripts
-  cancel-in-progress: false
+    # Exécution tous les jours à 22h UTC (23h GMT+1)
+    - cron: '0 22 * * *'
+  workflow_dispatch: # Permet de déclencher manuellement le workflow
 
 jobs:
-  sunday-script:
+  scrape-and-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Determine which script to run
-        id: which
-        run: |
-          WEEK=$(date +%V)
-          PARITY=$(( WEEK % 2 ))
-          INPUT="${{ github.event.inputs.script }}"
-
-          if [ "$INPUT" = "check_gaps" ]; then
-            echo "script=check_gaps" >> "$GITHUB_OUTPUT"
-          elif [ "$INPUT" = "empty_decks" ]; then
-            echo "script=empty_decks" >> "$GITHUB_OUTPUT"
-          elif [ "$PARITY" -eq 0 ]; then
-            echo "script=check_gaps" >> "$GITHUB_OUTPUT"
-          else
-            echo "script=empty_decks" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Checkout repository with submodules
-        if: always()
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
@@ -48,7 +19,6 @@ jobs:
           fetch-depth: 0
 
       - name: Sync submodule to latest remote
-        if: always()
         run: |
           SUBMODULE_PATH=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
           cd "$SUBMODULE_PATH"
@@ -57,65 +27,59 @@ jobs:
           git pull origin "$BRANCH"
 
       - name: Set up Python
-        if: always()
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
 
       - name: Install project
-        if: always()
         run: |
           pip install --upgrade pip
           pip install -e .
 
-      - name: Run top8_check_gaps
-        if: steps.which.outputs.script == 'check_gaps'
-        run: python -m scraper.scripts.top8_check_gaps
+      - name: Run scraping - MTGO
+        run: scrape --source mtgo
 
-      - name: Run mtgo_empty_decks
-        if: steps.which.outputs.script == 'empty_decks'
-        run: python -m scraper.scripts.mtgo_empy_decks
+      - name: Run scraping - MTGTop8
+        run: scrape --source mtgtop8 --span 300
 
       - name: Configure Git
-        if: always()
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Commit and push scraped data
-        if: always()
         run: |
           DATE=$(date -u +"%Y-%m-%d")
-          SCRIPT="${{ steps.which.outputs.script }}"
-
-          if [ "$SCRIPT" = "check_gaps" ]; then
-            MSG="Biweekly Gap Fill"
-          else
-            MSG="Biweekly Empty Decks Fix"
-          fi
 
           SUBMODULE_PATH=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
           cd "$SUBMODULE_PATH"
 
           if [[ -n $(git status --porcelain) ]]; then
             git add .
-            git commit -m "$DATE $MSG" || true
+            git commit -m "$DATE Daily Scraping"
             git push origin HEAD
           fi
 
           cd ..
           if [[ -n $(git status --porcelain "$SUBMODULE_PATH") ]]; then
             git add "$SUBMODULE_PATH"
-            git commit -m "$DATE Update scraping data submodule ($MSG)" || true
-
-            git fetch origin
-            git pull --rebase
+            git commit -m "$DATE Update scraping data submodule"
+            git pull --rebase origin main
             git push
 
-            echo "✅ Completed and pushed successfully"
+            echo "✅ Scraping completed and pushed successfully"
+
+            # Déclencher le workflow d'import dans l'autre repo
+            curl -L \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ secrets.IMPORT_REPO }}/dispatches \
+              -d '{"event_type":"scraping_completed"}'
           else
-            echo "ℹ️ No changes detected"
+            echo "ℹ️ No changes detected in scraped data"
           fi
 
       - name: Send success email
@@ -126,11 +90,11 @@ jobs:
           server_port: 587
           username: ${{ secrets.GMAIL_USERNAME }}
           password: ${{ secrets.GMAIL_APP_PASSWORD }}
-          subject: "✅ Biweekly Sunday Script Success (${{ steps.which.outputs.script }}) - ${{ github.run_id }}"
+          subject: "✅ Daily Scraping Success - ${{ github.run_id }}"
           to: ${{ secrets.NOTIFICATION_EMAIL }}
           from: ${{ secrets.GMAIL_USERNAME }}
           body: |
-            Le script bimensuel du dimanche (${{ steps.which.outputs.script }}) s'est terminé avec succès.
+            Le scraping quotidien s'est terminé avec succès.
 
             Date: ${{ github.event.repository.updated_at }}
             Repository: ${{ github.repository }}
@@ -147,11 +111,11 @@ jobs:
           server_port: 587
           username: ${{ secrets.GMAIL_USERNAME }}
           password: ${{ secrets.GMAIL_APP_PASSWORD }}
-          subject: "❌ Biweekly Sunday Script Failed (${{ steps.which.outputs.script }}) - ${{ github.run_id }}"
+          subject: "❌ Daily Scraping Failed - ${{ github.run_id }}"
           to: ${{ secrets.NOTIFICATION_EMAIL }}
           from: ${{ secrets.GMAIL_USERNAME }}
           body: |
-            ⚠️ Le script bimensuel du dimanche (${{ steps.which.outputs.script }}) a échoué.
+            ⚠️ Le scraping quotidien a échoué.
 
             Date: ${{ github.event.repository.updated_at }}
             Repository: ${{ github.repository }}
