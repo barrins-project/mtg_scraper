@@ -1,7 +1,7 @@
 import json
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 import requests
@@ -17,14 +17,14 @@ def get_qualified_players() -> None:
     url = "https://mtgprime.fr/championnat-france-duel-commander-2025-qualifies/"
     qualified_players = get_tables_from_url(url)[0]
 
-    players: List[CircuitPlayer] = []
+    players: list[CircuitPlayer] = []
     for _, row in qualified_players.iterrows():
         players.append(get_player_details(row))
 
     save_players_to_file(players)
 
 
-def get_tables_from_url(url: str) -> List[pd.DataFrame]:
+def get_tables_from_url(url: str) -> list[pd.DataFrame]:
     response = requests.get(url, headers=HEADERS)
     response.raise_for_status()
 
@@ -43,7 +43,7 @@ def get_player_details(player_row: pd.Series) -> CircuitPlayer:
     is_regional_qualifier = "CR" in str(player_row["CR / Open"])
     is_open_qualifier = "Open" in str(player_row["CR / Open"])
 
-    scraped_data: Dict[str, Any] = {
+    scraped_data: dict[str, Any] = {
         "surname": surname,
         "name": name,
         "alias": pseudo,
@@ -59,7 +59,7 @@ def get_player_details(player_row: pd.Series) -> CircuitPlayer:
     return CircuitPlayer.from_raw(scraped_data)
 
 
-def save_players_to_file(players: List[CircuitPlayer]) -> None:
+def save_players_to_file(players: list[CircuitPlayer]) -> None:
     BASE_PATH.mkdir(parents=True, exist_ok=True)
     file_path = Path(BASE_PATH / FILENAME)
 

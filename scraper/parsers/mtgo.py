@@ -1,6 +1,5 @@
 import re
 from datetime import date, timedelta
-from typing import List, Optional
 
 from bs4 import BeautifulSoup, Tag
 
@@ -9,7 +8,7 @@ from scraper.utils.date_parsing import parse_date
 from scraper.utils.swiss_tournament import get_num_rounds
 
 
-def tournament(soup: BeautifulSoup, tournament_url: str) -> Optional[Tournament]:
+def tournament(soup: BeautifulSoup, tournament_url: str) -> Tournament | None:
     tournament_date = get_date(soup)
     if not tournament_date:
         print("❌ Date manquante, extraction annulée.")
@@ -24,8 +23,8 @@ def tournament(soup: BeautifulSoup, tournament_url: str) -> Optional[Tournament]
     )
 
 
-def decks(soup: BeautifulSoup, tournament_url: str) -> List[Deck]:
-    decks: List[Deck] = []
+def decks(soup: BeautifulSoup, tournament_url: str) -> list[Deck]:
+    decks: list[Deck] = []
     try:
         for deck in soup.select("section.decklist"):
             decks.append(get_deck(deck, tournament_url))
@@ -34,11 +33,11 @@ def decks(soup: BeautifulSoup, tournament_url: str) -> List[Deck]:
     return decks
 
 
-def rounds(soup: BeautifulSoup) -> List[Round]:
+def rounds(soup: BeautifulSoup) -> list[Round]:
     return [get_round(round) for round in soup.select(".decklist-bracket-round")]
 
 
-def standings(soup: BeautifulSoup) -> List[Standing]:
+def standings(soup: BeautifulSoup) -> list[Standing]:
     standings_table = soup.select_one("#decklistStandings table.hidden-xs tbody")
     if not standings_table:
         return []
@@ -51,7 +50,7 @@ def standings(soup: BeautifulSoup) -> List[Standing]:
     ]
 
 
-def get_date(soup: BeautifulSoup) -> Optional[date]:
+def get_date(soup: BeautifulSoup) -> date | None:
     try:
         date_element = soup.select_one("p.decklist-posted-on")
         if not date_element:
@@ -109,8 +108,8 @@ def get_deck(deck_section: Tag, url: str) -> Deck:
     date_tag = deck_section.find("p", class_="decklist-date")
     event_date = parse_date(date_tag.get_text(strip=True) if date_tag else "08/05/1993")
 
-    mainboard: List[CardEntry] = []
-    sideboard: List[CardEntry] = []
+    mainboard: list[CardEntry] = []
+    sideboard: list[CardEntry] = []
     mainboard_tag = deck_section.select(".decklist-sort-type .decklist-category")
     for type_tag in mainboard_tag:
         for card_tag in type_tag.select(".decklist-category-card"):

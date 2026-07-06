@@ -1,5 +1,4 @@
 from datetime import date
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -12,8 +11,8 @@ class CardEntry(BaseModel):
 class Deck(BaseModel):
     date: date
     player: str
-    result: Optional[int] = None
+    result: int | None = None
     anchor_uri: str
-    mainboard: List[CardEntry]
-    sideboard: Optional[List[CardEntry]] = None
-    notes: Optional[str] = None
+    mainboard: list[CardEntry]
+    sideboard: list[CardEntry] | None = None
+    notes: str | None = None

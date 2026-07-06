@@ -1,13 +1,12 @@
 from collections import defaultdict
 from queue import Queue
 from threading import Lock, Thread
-from typing import DefaultDict, List
 
 from scraper.services.mtgtop8 import Top8Queue, consumer, producer
 from scraper.utils import mtgtop8_utils
 
 
-def get_gaps(max_gaps: int | None = 2000) -> List[int]:
+def get_gaps(max_gaps: int | None = 2000) -> list[int]:
     scrapes = [
         int(file.stem.split("_")[0])
         for file in list(mtgtop8_utils.BASE_PATH.rglob("*.json"))
@@ -39,7 +38,7 @@ def scrape_gaps(
 
         task_queue: Top8Queue = Queue()
         lock = Lock()
-        retries: DefaultDict[str, int] = defaultdict(int)
+        retries: dict[str, int] = defaultdict(int)
 
         for i in range(0, len(chunk_ids), batch_size):
             batch = chunk_ids[i : i + batch_size]

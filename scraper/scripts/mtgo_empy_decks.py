@@ -3,14 +3,13 @@ from collections import defaultdict
 from pathlib import Path
 from queue import Queue
 from threading import Lock, Thread
-from typing import DefaultDict, List
 
 from scraper.services.mtgo import MTGTOQueue, consumer
 from scraper.utils import driver_utils, mtgo_utils
 
 
 def get_tournaments_without_decks(queue: MTGTOQueue, lock: Lock) -> None:
-    empty_files: List[Path] = []
+    empty_files: list[Path] = []
 
     for path in mtgo_utils.BASE_PATH.rglob("*.json"):
         try:
@@ -35,7 +34,7 @@ def scrape_tournaments_without_decks(
     task_queue: MTGTOQueue = Queue()
     lock = Lock()
     drivers = [driver_utils.init_driver() for _ in range(num_threads)]
-    retries: DefaultDict[str, int] = defaultdict(int)
+    retries: dict[str, int] = defaultdict(int)
 
     producer_thread = Thread(
         target=get_tournaments_without_decks,

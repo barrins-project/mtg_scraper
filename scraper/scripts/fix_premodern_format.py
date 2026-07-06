@@ -5,13 +5,12 @@ Suite à la PR #1: https://github.com/barrins-project/mtg_scraper/pull/1
 
 import json
 from pathlib import Path
-from typing import List
 
 BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped"
 
 
-def get_all_premodern_files() -> List[Path]:
-    res: List[Path] = []
+def get_all_premodern_files() -> list[Path]:
+    res: list[Path] = []
     for path in BASE_PATH.rglob("*.json"):
         if "premodern" in str(path):
             res.append(path)

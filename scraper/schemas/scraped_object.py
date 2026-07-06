@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
@@ -11,6 +11,6 @@ if TYPE_CHECKING:
 
 class MTGScrape(BaseModel):
     tournament: "Tournament"
-    decks: List["Deck"] = []
-    rounds: List["Round"] = []
-    standings: List["Standing"] = []
+    decks: list["Deck"] = []
+    rounds: list["Round"] = []
+    standings: list["Standing"] = []

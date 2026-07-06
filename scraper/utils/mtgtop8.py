@@ -1,7 +1,6 @@
 import json
 import re
 from pathlib import Path
-from typing import Optional
 
 from bs4 import BeautifulSoup
 
@@ -45,7 +44,7 @@ def we_should_scrape_it(tournament_url: str) -> bool:
     ]
 
 
-def scrape_tournament(url: str, soup: BeautifulSoup) -> Optional[MTGScrape]:
+def scrape_tournament(url: str, soup: BeautifulSoup) -> MTGScrape | None:
     tournament = parser.tournament(url, soup)
     if not tournament:
         print("❌ Element manquant dans les données du tournoi, extraction annulée.")

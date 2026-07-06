@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 
@@ -11,4 +9,4 @@ class Match(BaseModel):
 
 class Round(BaseModel):
     round_name: str
-    matches: List[Match] = []
+    matches: list[Match] = []

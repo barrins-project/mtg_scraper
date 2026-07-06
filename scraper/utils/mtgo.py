@@ -2,7 +2,6 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import TimeoutException
@@ -51,7 +50,7 @@ def sanitize_filename(name: str) -> str:
 
 def scrape_tournament(
     driver: WebDriver, url: str, timeout: int = DEFAULT_RENDER_TIMEOUT
-) -> Optional[MTGScrape]:
+) -> MTGScrape | None:
     driver.get(url)
 
     try:

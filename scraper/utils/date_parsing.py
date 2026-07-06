@@ -1,10 +1,9 @@
 from datetime import date, datetime
-from typing import List, Tuple
 
 
 def parse_date(
     date_text: object,
-    formats: List[str] = ["%m/%d/%Y", "%B %d, %Y"],
+    formats: list[str] = ["%m/%d/%Y", "%B %d, %Y"],
 ) -> date:
     try:
         if isinstance(date_text, date):
@@ -22,8 +21,8 @@ def parse_date(
     return datetime(1993, 8, 5).date()
 
 
-def get_month_range(date_from: date, date_to: date) -> List[Tuple[int, int]]:
-    date_tuples: List[Tuple[int, int]] = []
+def get_month_range(date_from: date, date_to: date) -> list[tuple[int, int]]:
+    date_tuples: list[tuple[int, int]] = []
     for year in range(date_from.year, date_to.year + 1):
         start_month = date_from.month if year == date_from.year else 1
         end_month = date_to.month if year == date_to.year else 12

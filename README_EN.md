@@ -1,7 +1,7 @@
 # 🧙 MTG Scraper
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![Changelog](https://img.shields.io/badge/changelog-0.2.0-blue.svg)](CHANGELOG.md)
 
 [English](https://github.com/barrins-project/mtg_scraper/blob/main/README_EN.md) | [French](https://github.com/barrins-project/mtg_scraper/blob/main/README.md)
@@ -27,7 +27,7 @@ This project is built to be part of a data pipeline for statistical analysis and
 
 ### 1. Clone and Install
 
-Make sure Python 3.10+ is installed, then run:
+Make sure Python 3.13+ is installed, then run:
 
 ```bash
 git clone https://github.com/barrins-project/mtg_scraper.git

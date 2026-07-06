@@ -3,14 +3,13 @@ from collections import defaultdict
 from datetime import date
 from queue import Queue
 from threading import Lock, Thread
-from typing import DefaultDict
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 
 from scraper.utils import driver_utils, mtgo_utils
 from scraper.utils.date_parsing import get_month_range
 
-type MTGTOQueue = Queue[str]
+MTGTOQueue = Queue[str]
 
 
 def scrape_mtgo(
@@ -22,7 +21,7 @@ def scrape_mtgo(
     task_queue: MTGTOQueue = Queue()
     lock = Lock()
     drivers = [driver_utils.init_driver() for _ in range(num_threads)]
-    retries: DefaultDict[str, int] = defaultdict(int)
+    retries: dict[str, int] = defaultdict(int)
 
     producer_thread = Thread(
         target=producer,

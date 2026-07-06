@@ -1,16 +1,26 @@
 name: Biweekly Sunday Scripts
 
+# Ce workflow n'a plus de déclencheur `schedule` propre : il partageait auparavant
+# le créneau du dimanche 22h UTC avec Daily Scraping, ce qui pouvait déclencher les
+# deux workflows en parallèle et les faire entrer en concurrence sur le même push
+# (sous-module + `main`). Il est désormais déclenché :
+# - automatiquement le dimanche, en fin de run de "Daily Scraping" (workflow_call),
+#   ce qui garantit une exécution strictement séquentielle ;
+# - manuellement via workflow_dispatch pour un besoin ponctuel.
 on:
-  schedule:
-    # Exécution chaque dimanche à 22h UTC :
-    # - semaines paires  → top8_check_gaps
-    # - semaines impaires → mtgo_empty_decks
-    - cron: '0 22 * * 0'
+  workflow_call:
+    inputs:
+      script:
+        description: 'Script à exécuter (check_gaps | empty_decks)'
+        required: false
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       script:
         description: 'Script à exécuter (check_gaps | empty_decks)'
         required: false
+        type: string
         default: ''
 
 concurrency:
@@ -27,7 +37,7 @@ jobs:
         run: |
           WEEK=$(date +%V)
           PARITY=$(( WEEK % 2 ))
-          INPUT="${{ github.event.inputs.script }}"
+          INPUT="${{ inputs.script }}"
 
           if [ "$INPUT" = "check_gaps" ]; then
             echo "script=check_gaps" >> "$GITHUB_OUTPUT"
@@ -60,7 +70,7 @@ jobs:
         if: always()
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install project

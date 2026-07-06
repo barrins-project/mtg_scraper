@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -40,8 +39,8 @@ def get_mtgo_tournaments(
     year: int,
     month: int,
     timeout: int = 15,
-) -> List[str]:
-    tournaments: List[str] = []
+) -> list[str]:
+    tournaments: list[str] = []
 
     for attempt in range(MAX_RETRIES + 1):
         driver.get(BASE_URL + f"{year}/{month:02}")
@@ -49,7 +48,10 @@ def get_mtgo_tournaments(
         try:
             WebDriverWait(driver, timeout).until(
                 EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, TOURNAMENT_LINKS_SELECTOR)
+                    (
+                        By.CSS_SELECTOR,
+                        TOURNAMENT_LINKS_SELECTOR,
+                    )
                 )
             )
         except TimeoutException:

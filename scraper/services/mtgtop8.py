@@ -2,14 +2,13 @@ import time
 from collections import defaultdict
 from queue import Queue
 from threading import Lock, Thread
-from typing import DefaultDict, Tuple
 
 from bs4 import BeautifulSoup
 
 from scraper.parsers import mtgtop8 as parser
 from scraper.utils import mtgtop8_utils
 
-type Top8Queue = Queue[Tuple[str, BeautifulSoup]]
+Top8Queue = Queue[tuple[str, BeautifulSoup]]
 
 
 def scrape_mtgtop8(
@@ -18,7 +17,7 @@ def scrape_mtgtop8(
 ) -> None:
     task_queue: Top8Queue = Queue()
     lock = Lock()
-    retries: DefaultDict[str, int] = defaultdict(int)
+    retries: dict[str, int] = defaultdict(int)
 
     first_id = mtgtop8_utils.get_max_id_scraped() + 1
     for i in range(span // 10):

@@ -7,9 +7,10 @@ on:
   workflow_dispatch: # Permet de déclencher manuellement le workflow
 
 # Partage le même groupe que le workflow bimensuel du dimanche : les deux workflows
-# écrivent dans le même sous-module et poussent sur `main`. Sans ce verrou, les deux
-# runs planifiés à 22h UTC le dimanche s'exécuteraient en parallèle et se feraient
-# concurrence sur le même push (risque de rejet non-fast-forward / corruption).
+# écrivent dans le même sous-module et poussent sur `main`. Ce workflow déclenche lui-même
+# Biweekly Sunday Scripts en fin de run (voir job `trigger-biweekly-gaps`), ce qui les
+# sérialise déjà ; ce verrou reste en défense en profondeur si Biweekly est aussi
+# lancé manuellement (workflow_dispatch) pendant un run de Daily Scraping.
 concurrency:
   group: mtg-scraper-pipeline
   cancel-in-progress: false
@@ -17,8 +18,19 @@ concurrency:
 jobs:
   scrape-and-commit:
     runs-on: ubuntu-latest
+    outputs:
+      is_sunday: ${{ steps.day.outputs.is_sunday }}
 
     steps:
+      - name: Determine day of week
+        id: day
+        run: |
+          if [ "$(date -u +%u)" = "7" ]; then
+            echo "is_sunday=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_sunday=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
@@ -37,7 +49,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install project
@@ -132,3 +144,10 @@ jobs:
             Run ID: ${{ github.run_id }}
 
             Consultez les logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  trigger-biweekly-gaps:
+    name: Trigger Biweekly Sunday Scripts
+    needs: scrape-and-commit
+    if: needs.scrape-and-commit.outputs.is_sunday == 'true'
+    uses: ./.github/workflows/biweekly_check_gaps.yml
+    secrets: inherit

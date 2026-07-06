@@ -1,6 +1,5 @@
 import json
 import re
-from typing import Mapping
 
 from scraper.utils.mtgtop8 import BASE_PATH, sanitize_string
 
@@ -11,7 +10,7 @@ def rename_existing_files() -> None:
             with open(json_file, encoding="utf-8") as f:
                 data = json.load(f)
 
-            tournament: Mapping[str, str] = data.get("tournament", {})
+            tournament: dict[str, str] = data.get("tournament", {})
             tid = re.search(r"event\?e=(\d+)", tournament.get("url", ""))
             if not tid:
                 print(f"❌ Tournament ID not found in URL: {tournament.get('url')}")

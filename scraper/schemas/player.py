@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Union, get_args, get_origin
+import types
+from typing import Any, Union, get_args, get_origin
 
 from pydantic import BaseModel
 
@@ -21,8 +22,8 @@ class CircuitPlayer(BaseModel):
     model_config = {"from_attributes": True}
 
     @classmethod
-    def from_raw(cls, raw: Dict[str, Any]) -> CircuitPlayer:
-        data: Dict[str, Any] = {}
+    def from_raw(cls, raw: dict[str, Any]) -> CircuitPlayer:
+        data: dict[str, Any] = {}
 
         for name, field in cls.model_fields.items():
             v = raw.get(name, None)
@@ -31,7 +32,7 @@ class CircuitPlayer(BaseModel):
 
             expected = field.annotation
             origin = get_origin(expected)
-            if origin is Union:
+            if origin is Union or origin is types.UnionType:
                 args = tuple(a for a in get_args(expected) if a is not type(None))
                 if len(args) == 1:
                     expected = args[0]

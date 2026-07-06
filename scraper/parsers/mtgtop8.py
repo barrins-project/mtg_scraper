@@ -1,7 +1,7 @@
 import re
 import time
 from datetime import date, datetime
-from typing import Dict, List, Optional, Tuple, cast
+from typing import cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -45,8 +45,8 @@ def tournament(tournament_url: str, tournament_soup: BeautifulSoup) -> Tournamen
     )
 
 
-def decks(tournament_soup: BeautifulSoup) -> List[Deck]:
-    decks_dict: Dict[int, Deck] = {}
+def decks(tournament_soup: BeautifulSoup) -> list[Deck]:
+    decks_dict: dict[int, Deck] = {}
 
     top8_tags = tournament_soup.select(
         ".chosen_tr div.S14 a[href^='?e='], .hover_tr div.S14 a[href^='?e=']"
@@ -119,7 +119,7 @@ def get_players_qty(tournament_soup: BeautifulSoup) -> int:
     return 0
 
 
-def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
+def get_deck_from_top8(deck_tag: Tag) -> tuple[int, Deck]:
     href = str(deck_tag.get("href", ""))
     id_match = re.search(r"d=(\d+)", href)
     if not id_match:
@@ -174,7 +174,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
     )
 
 
-def get_deck_out_top8(deck_tag: Tag) -> Tuple[int, Deck]:
+def get_deck_out_top8(deck_tag: Tag) -> tuple[int, Deck]:
     deck_parent = deck_tag.parent
     if not deck_parent:
         raise ValueError("Parent block not found")
@@ -201,7 +201,7 @@ def get_deck_out_top8(deck_tag: Tag) -> Tuple[int, Deck]:
     )
 
 
-def get_decklist(deck_id: int) -> Tuple[List[CardEntry], List[CardEntry]]:
+def get_decklist(deck_id: int) -> tuple[list[CardEntry], list[CardEntry]]:
     decklist_url = f"https://mtgtop8.com/mtgo?d={deck_id}"
     decklist_soup = str(get_tournament_soup(decklist_url).prettify())
 
@@ -217,8 +217,8 @@ def get_decklist(deck_id: int) -> Tuple[List[CardEntry], List[CardEntry]]:
     return mainboard, sideboard
 
 
-def get_cardentries(decklist: str) -> List[CardEntry]:
-    cardentries: List[CardEntry] = []
+def get_cardentries(decklist: str) -> list[CardEntry]:
+    cardentries: list[CardEntry] = []
 
     for line in decklist.split("\n"):
         line = line.strip()
@@ -247,7 +247,7 @@ def sanitize_cardname(card_name: str) -> str:
     return card_name
 
 
-def get_notes(deck_id: int) -> Optional[str]:
+def get_notes(deck_id: int) -> str | None:
     deck_url = f"https://mtgtop8.com/event?e=1&d={deck_id}&explain_deck=Y"
 
     data = requests.get(deck_url, headers=HEADERS)

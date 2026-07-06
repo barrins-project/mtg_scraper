@@ -1,10 +1,11 @@
 import argparse
 import json
 from collections import defaultdict
+from collections.abc import Generator
 from pathlib import Path
 from queue import Queue
 from threading import Lock, Thread
-from typing import Any, DefaultDict, Generator, List, Optional, cast
+from typing import Any, cast
 
 from scraper.services.mtgtop8 import Top8Queue, consumer, producer
 from scraper.utils.mtgtop8 import BASE_PATH, get_id_from_filepath
@@ -66,7 +67,7 @@ def rescrape_files(
     batch_size: int,
     num_threads: int,
     chunk_by_chunk: bool,
-    target: Optional[str],
+    target: str | None,
     dry_run: bool,
 ) -> None:
     files = sorted(
@@ -77,7 +78,7 @@ def rescrape_files(
         print("No JSON files found in the base path. Exiting.")
         return
 
-    keys_to_check: Optional[List[str]] = None
+    keys_to_check: list[str] | None = None
     if target:
         keys_to_check = target.split(">")
         print(f"🔎 Checking for key {' > '.join(keys_to_check)} in all files...")
@@ -107,7 +108,7 @@ def rescrape_files(
         if chunk_by_chunk:
             input("Press Enter to start processing this chunk...")
 
-        chunk_ids: List[int] = get_ids_to_rescrape(
+        chunk_ids: list[int] = get_ids_to_rescrape(
             files=chunk_files,
             keys_to_check=keys_to_check,
             batch_size=batch_size,
@@ -115,7 +116,7 @@ def rescrape_files(
 
         task_queue: Top8Queue = Queue()
         lock = Lock()
-        retries: DefaultDict[str, int] = defaultdict(int)
+        retries: dict[str, int] = defaultdict(int)
 
         for i in range(0, len(chunk_ids), batch_size):
             batch = chunk_ids[i : i + batch_size]
@@ -148,13 +149,13 @@ def rescrape_files(
 
 
 def get_ids_to_rescrape(
-    files: List[Path],
-    keys_to_check: Optional[List[str]],
+    files: list[Path],
+    keys_to_check: list[str] | None,
     batch_size: int,
-) -> List[int]:
-    rescrape_ids: List[int] = []
+) -> list[int]:
+    rescrape_ids: list[int] = []
 
-    def batch_process(files_chunk: List[Path]) -> Generator[int, Any, None]:
+    def batch_process(files_chunk: list[Path]) -> Generator[int, Any, None]:
         for file in files_chunk:
             try:
                 with open(file, "r", encoding="utf-8") as f:
@@ -181,7 +182,7 @@ def get_ids_to_rescrape(
     return rescrape_ids
 
 
-def has_nested_key(data: dict[str, Any], keys: List[str]) -> bool:
+def has_nested_key(data: dict[str, Any], keys: list[str]) -> bool:
     """Vérifie si des clés imbriquées existent dans un dictionnaire JSON."""
     d: Any = data
     for key in keys:
