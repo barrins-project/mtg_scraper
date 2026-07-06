@@ -22,6 +22,9 @@ Conçu pour être intégré dans des pipelines de collecte de données, ce proje
   plutôt que des `sleep()` fixes : le scraper attend que la page ait
   réellement fini de se rendre, avec un timeout croissant lors des tentatives
   suivantes en cas de rendu lent
+- 🔒 Dépendances surveillées automatiquement : mises à jour hebdomadaires via
+  Dependabot et audit `pip-audit` (CVE connues) à chaque exécution des
+  workflows planifiés
 
 ## 🚀 Utilisation
 

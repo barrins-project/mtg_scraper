@@ -23,6 +23,12 @@ on:
         type: string
         default: ''
 
+# Le push vers `main` et le sous-module `scraped` se fait via `secrets.PAT_TOKEN`
+# (voir l'étape "Checkout"), pas via le GITHUB_TOKEN par défaut. Celui-ci n'a donc
+# besoin que d'un accès en lecture.
+permissions:
+  contents: read
+
 concurrency:
   group: mtg-scraper-pipeline
   cancel-in-progress: false
@@ -78,6 +84,12 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -e .
+
+      - name: Audit dependencies for known vulnerabilities
+        if: always()
+        run: |
+          pip install pip-audit
+          pip-audit
 
       - name: Run top8_check_gaps
         if: steps.which.outputs.script == 'check_gaps'

@@ -22,6 +22,8 @@ This project is built to be part of a data pipeline for statistical analysis and
   of fixed `sleep()` calls: the scraper waits for the page to actually finish
   rendering, with a growing timeout on subsequent retries when rendering is
   slow
+- 🔒 Dependencies monitored automatically: weekly Dependabot updates plus a
+  `pip-audit` check (known CVEs) on every scheduled workflow run
 
 ## 🚀 Usage
 

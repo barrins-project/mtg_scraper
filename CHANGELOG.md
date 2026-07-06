@@ -35,6 +35,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   silently the moment one was added. The check now also matches
   `types.UnionType`.
 
+### Security
+
+- Removed the `webdriver-manager` dependency. `selenium` (already required,
+  ≥4.6) bundles its own first-party Selenium Manager, which resolves and
+  downloads the matching Chrome driver directly from Google's official
+  distribution points. `webdriver-manager` was a third-party package whose
+  entire job was downloading and executing a native binary — dropping it
+  shrinks the dependency graph and removes one more party that would need to
+  be compromised to tamper with the driver binary this project executes
+  unattended, on a schedule, with repo-write credentials.
+  `scraper/utils/selenium_driver.py::init_driver` now builds
+  `Service(log_output=os.devnull)` with no explicit `executable_path`.
+- Added `.github/dependabot.yml` for automated weekly dependency-update PRs
+  (`pip` and `github-actions` ecosystems). There was previously no automated
+  mechanism to surface outdated or vulnerable dependencies.
+- Added a `pip-audit` step to both `daily_scraping.yml` and
+  `biweekly_check_gaps.yml`, right after installing the project. The job
+  fails (and the existing failure-email notification fires) if a known CVE
+  is found in a resolved dependency, instead of silently scraping with
+  vulnerable packages.
+- Added explicit least-privilege `permissions: contents: read` to both
+  workflows. Neither workflow actually needs a *write*-scoped
+  `GITHUB_TOKEN`: pushes to `main` and the `scraped` submodule authenticate
+  via `secrets.PAT_TOKEN` (set on the checkout step), not the default
+  Actions token, so the default token only needs read access.
+
 ### Changed
 
 - **Breaking: minimum Python version raised from 3.12 to 3.13**

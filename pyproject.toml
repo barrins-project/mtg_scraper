@@ -24,7 +24,6 @@ dependencies = [
     "beautifulsoup4",
     "requests",
     "selenium", # MTGO Scrapping needs navigator simulating
-    "webdriver-manager", # MTGO Scrapping needs navigator simulating
     "pydantic",
     "pandas",
     "lxml",

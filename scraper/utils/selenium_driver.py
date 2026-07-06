@@ -8,7 +8,6 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
 
 from scraper.utils.mtgo import BASE_URL, MAX_RETRIES
 
@@ -26,10 +25,12 @@ def init_driver() -> webdriver.Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--log-level=3")
 
+    # Selenium Manager (intégré depuis Selenium 4.6) résout et télécharge
+    # automatiquement le driver Chrome correspondant au navigateur installé,
+    # directement depuis les points de distribution officiels de Google.
     service = Service(
-        ChromeDriverManager().install(),
-        log_path=os.devnull,  # supprime l’output du service ChromeDriver
-    )
+        log_output=os.devnull
+    )  # supprime l’output du service ChromeDriver
 
     return webdriver.Chrome(service=service, options=options)
 
