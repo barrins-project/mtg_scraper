@@ -1,12 +1,15 @@
 import json
 import re
-import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 from bs4 import BeautifulSoup
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from scraper.parsers import mtgo as parser
 from scraper.schemas import MTGScrape
@@ -14,6 +17,7 @@ from scraper.schemas import MTGScrape
 BASE_URL = "https://www.mtgo.com/decklists/"
 BASE_PATH = Path(__file__).resolve().parent.parent.parent / "scraped" / "mtgo.com"
 MAX_RETRIES = 3
+DEFAULT_RENDER_TIMEOUT = 15  # seconds to wait for the decklist page to render
 
 
 def we_should_scrape_it(tournament_url: str, max_days_to_be_recent: int = 3) -> bool:
@@ -46,10 +50,17 @@ def sanitize_filename(name: str) -> str:
 
 
 def scrape_tournament(
-    driver: WebDriver, url: str, sleep_time: int = 5
+    driver: WebDriver, url: str, timeout: int = DEFAULT_RENDER_TIMEOUT
 ) -> Optional[MTGScrape]:
     driver.get(url)
-    time.sleep(sleep_time)
+
+    try:
+        WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "p.decklist-posted-on"))
+        )
+    except TimeoutException:
+        print(f"⏱️ Timeout ({timeout}s) en attendant le rendu de la page : {url}")
+        return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     tournament = parser.tournament(soup, url)

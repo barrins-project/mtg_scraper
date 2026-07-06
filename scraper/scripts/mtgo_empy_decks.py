@@ -9,7 +9,7 @@ from scraper.services.mtgo import MTGTOQueue, consumer
 from scraper.utils import driver_utils, mtgo_utils
 
 
-def get_tournaments_without_decks(queue: Queue, lock: Lock) -> None:
+def get_tournaments_without_decks(queue: MTGTOQueue, lock: Lock) -> None:
     empty_files: List[Path] = []
 
     for path in mtgo_utils.BASE_PATH.rglob("*.json"):

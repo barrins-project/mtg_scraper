@@ -4,7 +4,7 @@ from collections import defaultdict
 from pathlib import Path
 from queue import Queue
 from threading import Lock, Thread
-from typing import Any, DefaultDict, Generator, List, Optional
+from typing import Any, DefaultDict, Generator, List, Optional, cast
 
 from scraper.services.mtgtop8 import Top8Queue, consumer, producer
 from scraper.utils.mtgtop8 import BASE_PATH, get_id_from_filepath
@@ -181,15 +181,15 @@ def get_ids_to_rescrape(
     return rescrape_ids
 
 
-def has_nested_key(data: dict, keys: List[str]) -> bool:
+def has_nested_key(data: dict[str, Any], keys: List[str]) -> bool:
     """Vérifie si des clés imbriquées existent dans un dictionnaire JSON."""
-    d = data
+    d: Any = data
     for key in keys:
         if isinstance(d, list):
-            d = d[0] if d else {}
+            d = cast(Any, d[0]) if d else {}
         if not isinstance(d, dict) or key not in d:
             return False
-        d = d[key]
+        d = cast(Any, d[key])
     return True
 
 

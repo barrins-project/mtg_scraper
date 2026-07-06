@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Changelog](https://img.shields.io/badge/changelog-0.2.0-blue.svg)](CHANGELOG.md)
 
 [English](https://github.com/barrins-project/mtg_scraper/blob/main/README_EN.md) | [French](https://github.com/barrins-project/mtg_scraper/blob/main/README.md)
 
@@ -17,6 +18,10 @@ This project is built to be part of a data pipeline for statistical analysis and
 - 📂 Output in standardized JSON format
 - 🧵 Parallel downloads to speed up scraping
 - 🧪 Ready for backend integration (FastAPI) and machine learning pipelines
+- ⏱️ MTGO scraping driven by explicit Selenium waits (`WebDriverWait`) instead
+  of fixed `sleep()` calls: the scraper waits for the page to actually finish
+  rendering, with a growing timeout on subsequent retries when rendering is
+  slow
 
 ## 🚀 Usage
 
@@ -43,13 +48,13 @@ scrape --source mtgtop8 --date-from 2024-05 --date-to 2024-12
 
 #### Options
 
-| Parameter     | Description                               | Default Value |
-| ------------- | ----------------------------------------- | ------------- |
-| `--source`    | Source to scrape: `mtgo` or `mtgtop8`     | `mtgo`        |
-| `--date-from` | Start date (`YYYY-MM` format) *(**MTGO** only)* | 5 days ago    |
-| `--date-to`   | End date (`YYYY-MM` format) *(**MTGO** only)   | Today         |
-| `--force-mtgo`| Force recraping *(**MTGO** only)   | False         |
-| `--span`   | Number of tournaments to inspect *(**MTGTOP8** only)   | 1000         |
+| Parameter     | Description                                          | Default Value |
+| ------------- | ---------------------------------------------------- | ------------- |
+| `--source`    | Source to scrape: `mtgo` or `mtgtop8`                | `mtgo`        |
+| `--date-from` | Start date (`YYYY-MM` format) *(**MTGO** only)*      | 5 days ago    |
+| `--date-to`   | End date (`YYYY-MM` format) *(**MTGO** only)         | Today         |
+| `--force-mtgo`| Force recraping *(**MTGO** only)                     | False         |
+| `--span`      | Number of tournaments to inspect *(**MTGTOP8** only) | 1000          |
 
 ### 3. Example in Code
 
@@ -66,6 +71,13 @@ Currently, scraping is not limited to a specific format within a source.
 ## 🧪 Tests
 
 Test suite is coming soon — contributions are welcome!
+
+## 📝 Changelog
+
+Notable changes for each version are documented in
+[CHANGELOG.md](CHANGELOG.md), which follows [Keep a
+Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic
+Versioning](https://semver.org/).
 
 ## 📈 Recommended Integration
 

@@ -25,7 +25,7 @@ def tournament(soup: BeautifulSoup, tournament_url: str) -> Optional[Tournament]
 
 
 def decks(soup: BeautifulSoup, tournament_url: str) -> List[Deck]:
-    decks = []
+    decks: List[Deck] = []
     try:
         for deck in soup.select("section.decklist"):
             decks.append(get_deck(deck, tournament_url))
@@ -47,7 +47,7 @@ def standings(soup: BeautifulSoup) -> List[Standing]:
     return [
         get_standing(row, nb_rounds)
         for row in standings_table.find_all("tr")
-        if isinstance(row, Tag) and row.find_all("td")  # éviter les lignes vides
+        if row and row.find_all("td")  # éviter les lignes vides
     ]
 
 
@@ -109,7 +109,8 @@ def get_deck(deck_section: Tag, url: str) -> Deck:
     date_tag = deck_section.find("p", class_="decklist-date")
     event_date = parse_date(date_tag.get_text(strip=True) if date_tag else "08/05/1993")
 
-    mainboard, sideboard = [], []
+    mainboard: List[CardEntry] = []
+    sideboard: List[CardEntry] = []
     mainboard_tag = deck_section.select(".decklist-sort-type .decklist-category")
     for type_tag in mainboard_tag:
         for card_tag in type_tag.select(".decklist-category-card"):

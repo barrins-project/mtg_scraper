@@ -14,7 +14,7 @@ on:
         default: ''
 
 concurrency:
-  group: biweekly-sunday-scripts
+  group: mtg-scraper-pipeline
   cancel-in-progress: false
 
 jobs:
@@ -101,6 +101,7 @@ jobs:
           if [[ -n $(git status --porcelain) ]]; then
             git add .
             git commit -m "$DATE $MSG" || true
+            git pull --rebase
             git push origin HEAD
           fi
 

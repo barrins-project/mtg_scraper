@@ -6,6 +6,14 @@ on:
     - cron: '0 22 * * *'
   workflow_dispatch: # Permet de déclencher manuellement le workflow
 
+# Partage le même groupe que le workflow bimensuel du dimanche : les deux workflows
+# écrivent dans le même sous-module et poussent sur `main`. Sans ce verrou, les deux
+# runs planifiés à 22h UTC le dimanche s'exécuteraient en parallèle et se feraient
+# concurrence sur le même push (risque de rejet non-fast-forward / corruption).
+concurrency:
+  group: mtg-scraper-pipeline
+  cancel-in-progress: false
+
 jobs:
   scrape-and-commit:
     runs-on: ubuntu-latest
@@ -58,6 +66,7 @@ jobs:
           if [[ -n $(git status --porcelain) ]]; then
             git add .
             git commit -m "$DATE Daily Scraping"
+            git pull --rebase
             git push origin HEAD
           fi
 

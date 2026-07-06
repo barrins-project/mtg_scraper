@@ -135,7 +135,7 @@ def get_deck_from_top8(deck_tag: Tag) -> Tuple[int, Deck]:
         if not parent_div:
             raise ValueError("Container block with player info not found.")
 
-        container = cast(Tag, parent_div)
+        container = parent_div
         if container.has_attr("class"):
             if "hover_tr" in container["class"] or "chosen_tr" in container["class"]:
                 break
@@ -218,7 +218,7 @@ def get_decklist(deck_id: int) -> Tuple[List[CardEntry], List[CardEntry]]:
 
 
 def get_cardentries(decklist: str) -> List[CardEntry]:
-    cardentries = []
+    cardentries: List[CardEntry] = []
 
     for line in decklist.split("\n"):
         line = line.strip()

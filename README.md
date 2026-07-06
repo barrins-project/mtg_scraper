@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Changelog](https://img.shields.io/badge/changelog-0.2.0-blue.svg)](CHANGELOG.md)
 
 [Français](https://github.com/barrins-project/mtg_scraper/blob/main/README.md) | [Anglais](https://github.com/barrins-project/mtg_scraper/blob/main/README_EN.md)
 
@@ -17,6 +18,10 @@ Conçu pour être intégré dans des pipelines de collecte de données, ce proje
 - 📂 Sortie au format JSON standardisée
 - 🧵 Téléchargement parallèle pour accélérer l’extraction
 - 🧪 Prêt pour intégration backend (FastAPI) et machine learning
+- ⏱️ Scraping MTGO piloté par des attentes explicites Selenium (`WebDriverWait`)
+  plutôt que des `sleep()` fixes : le scraper attend que la page ait
+  réellement fini de se rendre, avec un timeout croissant lors des tentatives
+  suivantes en cas de rendu lent
 
 ## 🚀 Utilisation
 
@@ -71,6 +76,13 @@ source
 ## 🧪 Tests
 
 À venir — contribution bienvenue !
+
+## 📝 Changelog
+
+Les changements notables de chaque version sont documentés dans
+[CHANGELOG.md](CHANGELOG.md), qui suit les conventions
+[Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et [Semantic
+Versioning](https://semver.org/lang/fr/).
 
 ## 📈 Intégration recommandée
 
