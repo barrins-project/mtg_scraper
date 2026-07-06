@@ -38,7 +38,7 @@ jobs:
           fi
 
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.PAT_TOKEN }}
           submodules: recursive
